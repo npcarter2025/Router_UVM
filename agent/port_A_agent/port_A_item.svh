@@ -26,7 +26,7 @@ class Port_A_Item extends uvm_sequence_item;
 
     // Constraints // I think this is redundant LOL 
     constraint addr_const {
-        addr_a inside {{[0:3]};}
+        addr_a inside {[0:3]};
     }
 
     // Maybe I could add a distribution for the valid_a
