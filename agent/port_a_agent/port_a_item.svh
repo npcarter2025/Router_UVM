@@ -2,7 +2,7 @@
 `define PORT_A_ITEM_SVH
 
 
-class Port_A_Item extends uvm_sequence_item;
+class port_a_item extends uvm_sequence_item;
 
     rand bit [7:0] data_a;
     rand bit [1:0] addr_a;
@@ -12,7 +12,7 @@ class Port_A_Item extends uvm_sequence_item;
     // Response signals
     bit ready_a;
 
-    `uvm_object_utils_begin(Port_A_Item)
+    `uvm_object_utils_begin(port_a_item)
         `uvm_field_int(data_a,  UVM_ALL_ON)
         `uvm_field_int(addr_a,  UVM_ALL_ON)
         `uvm_field_int(valid_a, UVM_ALL_ON)
