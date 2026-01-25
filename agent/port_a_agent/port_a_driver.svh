@@ -32,9 +32,31 @@ class port_a_driver extends uvm_driver #(port_a_item);
         vif.drv_cb_Port_A.valid_a <= '0;
 
         forever begin
-
-            `uvm_info("PORT_A_DRV", "Driver ")
-
+            // Get next transaction from sequencer
+            seq_item_port.get_next_item(req);
+            
+            `uvm_info("PORT_A_DRV", $sformatf("Driving: %s", req.convert2string()), UVM_MEDIUM)
+            
+            // Drive the signals
+            vif.drv_cb_Port_A.data_a  <= req.data_a;
+            vif.drv_cb_Port_A.addr_a  <= req.addr_a;
+            vif.drv_cb_Port_A.valid_a <= req.valid_a;
+            
+            // Wait for handshake (ready_a) or timeout
+            @(vif.drv_cb_Port_A);
+            while (!vif.drv_cb_Port_A.ready_a) begin
+                @(vif.drv_cb_Port_A);
+            end
+            
+            // Capture response
+            req.ready_a = vif.drv_cb_Port_A.ready_a;
+            
+            // Deassert valid after transfer
+            vif.drv_cb_Port_A.valid_a <= 1'b0;
+            
+            // Signal sequencer we're done
+            seq_item_port.item_done();
+        end
     endtask
 
 
