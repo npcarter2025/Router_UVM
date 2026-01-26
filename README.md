@@ -1,6 +1,9 @@
 # UVM Testbench for a Dual_Port Router
 
 I made this so I could practice writing Virtual Sequencers, and RAL.
+
+The DUT is a simple Dual-Port Router, with additional Control Registers, that I am using RAL on.
+
 I'm thinking I'll add a DPI-C Golden Reference Model when I'm done.
 Below are some good debugging patterns that I am trying to memorize.
 
