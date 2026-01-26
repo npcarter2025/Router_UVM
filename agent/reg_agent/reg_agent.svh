@@ -1,12 +1,12 @@
-`ifndef PORT_A_AGENT_SVH
-`define PORT_A_AGENT_SVH
+`ifndef REG_AGENT_SVH
+`define REG_AGENT_SVH
 
-class port_a_agent extends uvm_agent;
-    `uvm_component_utils(port_a_agent)
+class reg_agent extends uvm_agent;
+    `uvm_component_utils(reg_agent)
 
-    port_a_driver drv;
-    port_a_monitor mon;
-    port_a_sequencer seqr;
+    reg_driver drv;
+    reg_monitor mon;
+    reg_sequencer seqr;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -15,9 +15,9 @@ class port_a_agent extends uvm_agent;
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
-        drv = port_a_driver::type_id::create("drv", this);
-        mon = port_a_monitor::type_id::create("mon", this);
-        seqr = port_a_sequencer::type_id::create("seqr", this);
+        drv = reg_driver::type_id::create("drv", this);
+        mon = reg_monitor::type_id::create("mon", this);
+        seqr = reg_sequencer::type_id::create("seqr", this);
 
     endfunction
 

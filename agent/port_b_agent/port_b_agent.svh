@@ -1,8 +1,8 @@
-`ifndef PORT_A_AGENT_SVH
-`define PORT_A_AGENT_SVH
+`ifndef PORT_B_AGENT_SVH
+`define PORT_B_AGENT_SVH
 
-class port_a_agent extends uvm_agent;
-    `uvm_component_utils(port_a_agent)
+class port_b_agent extends uvm_agent;
+    `uvm_component_utils(port_b_agent)
 
     port_a_driver drv;
     port_a_monitor mon;
@@ -15,9 +15,9 @@ class port_a_agent extends uvm_agent;
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
-        drv = port_a_driver::type_id::create("drv", this);
-        mon = port_a_monitor::type_id::create("mon", this);
-        seqr = port_a_sequencer::type_id::create("seqr", this);
+        drv = port_b_driver::type_id::create("drv", this);
+        mon = port_b_monitor::type_id::create("mon", this);
+        seqr = port_b_sequencer::type_id::create("seqr", this);
 
     endfunction
 
