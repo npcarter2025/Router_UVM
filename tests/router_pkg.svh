@@ -54,6 +54,14 @@ package router_pkg;
     `include "env/router_virtual_sequencer.svh"
 
     //----------------------------------------------------------
+    // RAL (Register Abstraction Layer)
+    //----------------------------------------------------------
+    `include "ral/ctrl_reg.svh"
+    `include "ral/collision_cnt_reg.svh"
+    `include "ral/router_reg_block.svh"
+    `include "ral/router_reg_adapter.svh"
+
+    //----------------------------------------------------------
     // Environment
     //----------------------------------------------------------
     `include "env/router_env.svh"
@@ -72,11 +80,13 @@ package router_pkg;
     `include "seq/collision_vseq.svh"
     `include "seq/priority_vseq.svh"
     `include "seq/disable_vseq.svh"
+    `include "seq/ral_sanity_vseq.svh"
 
     //----------------------------------------------------------
     // Tests
     //----------------------------------------------------------
     `include "tests/router_base_test.svh"
+    `include "tests/ral_sanity_test.svh"
 
 endpackage
 
