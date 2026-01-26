@@ -1,8 +1,6 @@
 `ifndef ROUTER_SCOREBOARD_DPI_SVH
 `define ROUTER_SCOREBOARD_DPI_SVH
 
-import router_dpi_pkg::*;
-
 `uvm_analysis_imp_decl(_port_a_dpi)
 `uvm_analysis_imp_decl(_port_b_dpi)
 `uvm_analysis_imp_decl(_output_dpi)
@@ -59,18 +57,18 @@ class router_scoreboard_dpi extends uvm_scoreboard;
         byte unsigned expected_data;
         int valid;
 
-        valid = router_mode_get_output(item.port_idx, expected_data);
+        valid = router_model_get_output(item.port_idx, expected_data);
 
         if (valid) begin
             if (item.data == expected_data) begin
-                `uvm_info("SB_DPI", $sformatf("DPI MATCH on port[%0d]: expected=0x%02h actual=0x$02h", item.port_idx, expected_data, item.data), UVM_MEDIUM)
+                `uvm_info("SB_DPI", $sformatf("DPI MATCH on port[%0d]: expected=0x%02h actual=0x%02h", item.port_idx, expected_data, item.data), UVM_MEDIUM)
                 match_count++;
             end else begin
-                `uvm_error("SB_DPI", $sformatf("DPI MISMATCH on port[%0d]: expected=0x%02h actual=0x$02h", item.port_idx, expected_data, item.data), UVM_MEDIUM)
+                `uvm_error("SB_DPI", $sformatf("DPI MISMATCH on port[%0d]: expected=0x%02h actual=0x%02h", item.port_idx, expected_data, item.data))
                 mismatch_count++;       
             end 
         end else begin
-            `uvm_error("SB_DPI", $sformatf("DPI: Unexpected output on port[%0d] (C++ model has no data)", item.port_idx), UVM_MEDIUM)
+            `uvm_error("SB_DPI", $sformatf("DPI: Unexpected output on port[%0d] (C++ model has no data)", item.port_idx))
             mismatch_count++;
         end 
     endfunction

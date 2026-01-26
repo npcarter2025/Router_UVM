@@ -16,8 +16,12 @@ class router_env extends uvm_env;
 
     router_virtual_sequencer m_vseqr;
     router_scoreboard m_scoreboard;
+    router_scoreboard_dpi m_scoreboard_dpi;  // DPI-C based scoreboard
 
     router_coverage m_coverage;
+    
+    // Configuration flag to enable/disable DPI scoreboard
+    bit enable_dpi_scoreboard = 1;  // Default: enabled
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -33,6 +37,14 @@ class router_env extends uvm_env;
 
         m_vseqr = router_virtual_sequencer::type_id::create("m_vseqr", this);
         m_scoreboard = router_scoreboard::type_id::create("m_scoreboard", this);
+        
+        // Optionally create DPI scoreboard
+        if (enable_dpi_scoreboard) begin
+            m_scoreboard_dpi = router_scoreboard_dpi::type_id::create("m_scoreboard_dpi", this);
+            `uvm_info(get_type_name(), "DPI-C scoreboard enabled", UVM_LOW)
+        end else begin
+            `uvm_info(get_type_name(), "DPI-C scoreboard disabled", UVM_LOW)
+        end
 
         m_reg_model = router_reg_block::type_id::create("m_reg_model");
         m_reg_model.build();
@@ -54,10 +66,18 @@ class router_env extends uvm_env;
         m_vseqr.p_port_b_seqr = m_port_b_agent.seqr;
         m_vseqr.p_reg_seqr    = m_reg_agent.seqr;
 
-        // Connect monitors to scoreboard
+        // Connect monitors to original scoreboard
         m_port_a_agent.mon.ap.connect(m_scoreboard.port_a_imp);
         m_port_b_agent.mon.ap.connect(m_scoreboard.port_b_imp);
         m_output_agent.monitor.ap.connect(m_scoreboard.output_imp);
+        
+        // Connect monitors to DPI scoreboard (if enabled)
+        if (enable_dpi_scoreboard) begin
+            m_port_a_agent.mon.ap.connect(m_scoreboard_dpi.port_a_imp);
+            m_port_b_agent.mon.ap.connect(m_scoreboard_dpi.port_b_imp);
+            m_output_agent.monitor.ap.connect(m_scoreboard_dpi.output_imp);
+            m_reg_agent.mon.ap.connect(m_scoreboard_dpi.reg_imp);
+        end
 
         m_reg_model.default_map.set_sequencer(m_reg_agent.seqr, m_reg_adapter);
         m_reg_model.default_map.set_auto_predict(0);
@@ -65,7 +85,7 @@ class router_env extends uvm_env;
         m_predictor.map     = m_reg_model.default_map;
         m_predictor.adapter = m_reg_adapter;
         m_reg_agent.mon.ap.connect(m_predictor.bus_in);
-        
+
         // connect coverage to monitors
         m_port_a_agent.mon.ap.connect(m_coverage.port_a_export);
         m_port_b_agent.mon.ap.connect(m_coverage.port_b_export);

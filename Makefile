@@ -15,6 +15,12 @@ TB_SOURCES = tb/tb_top.sv
 
 ALL_SOURCES = $(RTL_SOURCES) $(TB_SOURCES)
 
+# DPI-C files
+DPI_DIR = dpi
+DPI_SRC = $(DPI_DIR)/router_model.cpp
+DPI_SO = $(DPI_DIR)/router_model.so
+DPI_PKG = $(DPI_DIR)/router_dpi_pkg.sv
+
 # Test name (default: router_base_test)
 TEST ?= router_base_test
 
@@ -45,12 +51,23 @@ COV_FLAGS += -cm_name test_$(TEST)
 # Default target
 all: compile run
 
-# Compile the testbench
-compile:
+# Compile C++ DPI model to shared library
+$(DPI_SO): $(DPI_SRC)
 	@echo "============================================"
-	@echo "Compiling UVM Testbench..."
+	@echo "Compiling C++ DPI-C Model..."
 	@echo "============================================"
-	$(VCS) $(VCS_FLAGS) $(COV_FLAGS) $(ALL_SOURCES) -o $(SIMV)
+	g++ -shared -fPIC -o $@ $< -std=c++11
+
+# Compile the testbench (depends on DPI library)
+compile: $(DPI_SO)
+	@echo "============================================"
+	@echo "Compiling UVM Testbench with DPI-C..."
+	@echo "============================================"
+	$(VCS) $(VCS_FLAGS) $(COV_FLAGS) \
+		$(DPI_PKG) \
+		$(ALL_SOURCES) \
+		$(DPI_SO) \
+		-o $(SIMV)
 
 # Run simulation
 run:
@@ -78,10 +95,11 @@ clean:
 	@echo "Cleaning..."
 	rm -rf $(SIMV) $(SIMV).daidir csrc *.log *.vpd *.vcd
 	rm -rf ucli.key vc_hdrs.h .vcsmx_rebuild DVEfiles
+	rm -rf $(DPI_SO) coverage.vdb
 
 # Full clean (including waveforms)
 cleanall: clean
-	rm -rf *.vcd *.vpd *.fsdb novas* verdiLog 
+	rm -rf *.vcd *.vpd *.fsdb novas* verdiLog coverage_report 
 
 # View waveforms (if dump.vcd exists)
 waves:

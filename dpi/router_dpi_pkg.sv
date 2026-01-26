@@ -8,7 +8,7 @@ package router_dpi_pkg;
     import "DPI-C" function void router_model_write_ctrl(int unsigned data);
     import "DPI-C" function void router_model_port_a(byte unsigned data, byte unsigned addr);
     import "DPI-C" function void router_model_port_b(byte unsigned data, byte unsigned addr);
-    import "DPI-C" function int router_mode_get_output(byte unsigned port, output byte unsigned data);
+    import "DPI-C" function int router_model_get_output(byte unsigned port, output byte unsigned data);
     
 endpackage
 

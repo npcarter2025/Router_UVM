@@ -4,6 +4,9 @@
 package router_pkg;
     import uvm_pkg::*;
     `include "uvm_macros.svh"
+    
+    // Import DPI-C package for DPI scoreboard
+    import router_dpi_pkg::*;
 
     //----------------------------------------------------------
     // Items (sequence items / transactions)
@@ -47,6 +50,7 @@ package router_pkg;
     // Scoreboard
     //----------------------------------------------------------
     `include "env/router_scoreboard.svh"
+    `include "env/router_scoreboard_dpi.svh"
 
     //----------------------------------------------------------
     // Virtual Sequencer
