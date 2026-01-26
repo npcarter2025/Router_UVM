@@ -93,17 +93,19 @@ class router_scoreboard extends uvm_scoreboard;
         end
 
 
-        expected_t expected = expected_queue[item.port_idx].pop_front();
+        begin
+            expected_t exp_item;
+            exp_item = expected_queue[item.port_idx].pop_front();
 
-    
-        if (item.data == expected.data) begin
-            `uvm_info("SB", $sformatf("MATCH on port[%0d]: expected=0x%02h, actual=0x%02h (from %s)",
-                item.port_idx, expected.data, item.data, expected.source), UVM_MEDIUM)
-            match_count++;
-        end else begin
-            `uvm_error("SB", $sformatf("MISMATCH on port[%0d]: expected=0x%02h, actual=0x%02h (from %s)",
-                item.port_idx, expected.data, item.data, expected.source))
-            mismatch_count++;
+            if (item.data == exp_item.data) begin
+                `uvm_info("SB", $sformatf("MATCH on port[%0d]: expected=0x%02h, actual=0x%02h (from %s)",
+                    item.port_idx, exp_item.data, item.data, exp_item.source), UVM_MEDIUM)
+                match_count++;
+            end else begin
+                `uvm_error("SB", $sformatf("MISMATCH on port[%0d]: expected=0x%02h, actual=0x%02h (from %s)",
+                    item.port_idx, exp_item.data, item.data, exp_item.source))
+                mismatch_count++;
+            end
         end
     endfunction
 

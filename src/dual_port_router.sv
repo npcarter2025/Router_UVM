@@ -37,7 +37,6 @@ module dual_port_router (
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             ctrl_reg <= 32'h1; // Default: Enabled, Port A priority
-            collision_cnt <= 32'h0;
         end else if (reg_en && reg_we) begin
             if (reg_addr == 4'h0) ctrl_reg <= reg_wdata;
         end
@@ -74,6 +73,7 @@ module dual_port_router (
                 data_out[i] <= 8'h0;
                 valid_out[i] <= 1'b0;
             end
+            collision_cnt <= 32'h0;
         end else begin
             // Default: clear valid bits
             for (int i=0; i<4; i++) valid_out[i] <= 1'b0;

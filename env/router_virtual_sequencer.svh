@@ -6,7 +6,7 @@ class router_virtual_sequencer extends uvm_sequencer;
 
     port_a_sequencer p_port_a_seqr;
     port_b_sequencer p_port_b_seqr;
-    reg_seqr p_reg_seqr;
+    reg_sequencer p_reg_seqr;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);

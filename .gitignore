@@ -1,0 +1,8 @@
+docs/
+
+*.vcd
+*.daidir
+*.key
+*.log
+simv
+csrc

@@ -47,11 +47,17 @@ interface dual_port_router_if#(
         input ready_b;
     endclocking
 
-    // This should be passive, since its just the outputs
+    // Monitor clocking block - observes all signals
     clocking mon_cb @(posedge clk);
         default input #1ns output #1ns;
+        // Port A inputs
+        input data_a, addr_a, valid_a, ready_a;
+        // Port B inputs
+        input data_b, addr_b, valid_b, ready_b;
+        // Outputs
         input data_out, valid_out;
-        input ready_a, ready_b;
+        // Register interface
+        input reg_addr, reg_wdata, reg_en, reg_we, reg_rdata;
     endclocking
 
 

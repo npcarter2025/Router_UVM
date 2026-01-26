@@ -32,10 +32,15 @@ class router_env extends uvm_env;
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
 
-        m_vseqr.p_port_a_seqr = m_port_a_agent;
-        m_vseqr.p_port_b_seqr = m_port_b_agent;
-        m_vseqr.p_reg_seqr = m_reg_agent;
+        // Connect virtual sequencer to agent sequencers
+        m_vseqr.p_port_a_seqr = m_port_a_agent.seqr;
+        m_vseqr.p_port_b_seqr = m_port_b_agent.seqr;
+        m_vseqr.p_reg_seqr    = m_reg_agent.seqr;
 
+        // Connect monitors to scoreboard
+        m_port_a_agent.mon.ap.connect(m_scoreboard.port_a_imp);
+        m_port_b_agent.mon.ap.connect(m_scoreboard.port_b_imp);
+        m_output_agent.monitor.ap.connect(m_scoreboard.output_imp);
     endfunction
 endclass
 

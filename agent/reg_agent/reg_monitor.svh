@@ -27,23 +27,23 @@ class reg_monitor extends uvm_monitor;
     virtual task run_phase(uvm_phase phase);
         `uvm_info("REG_MON", "reg monitor run_phase beginning", UVM_LOW)
 
-        @(vif.drv_cb_Ctrl);
+        @(vif.mon_cb);
         wait(vif.rst_n);
-        @(vif.drv_cb_Ctrl);
+        @(vif.mon_cb);
 
-        `uvm_info("REG_MON", "Reset completed")
+        `uvm_info("REG_MON", "Reset completed", UVM_LOW)
 
         forever begin
-            @(vif.drv_cb_Ctrl);
+            @(vif.mon_cb);
 
-            if (vif.drv_cb_Ctrl.reg_en) begin
+            if (vif.mon_cb.reg_en) begin
                 reg_item item = reg_item::type_id::create("reg_item");
 
-                item.reg_addr = vif.drv_cb_Ctrl.reg_addr;
-                item.reg_wdata = vif.drv_cb_Ctrl.reg_wdata;
-                item.reg_en = vif.drv_cb_Ctrl.reg_en;
-                item.reg_we = vif.drv_cb_Ctrl.reg_we;
-                item.reg_rdata = vif.drv_cb_Ctrl.reg_rdata;
+                item.reg_addr  = vif.mon_cb.reg_addr;
+                item.reg_wdata = vif.mon_cb.reg_wdata;
+                item.reg_en    = vif.mon_cb.reg_en;
+                item.reg_we    = vif.mon_cb.reg_we;
+                item.reg_rdata = vif.mon_cb.reg_rdata;
 
                 `uvm_info("REG_MON", $sformatf("Observed: %s", item.convert2string()), UVM_MEDIUM)
 

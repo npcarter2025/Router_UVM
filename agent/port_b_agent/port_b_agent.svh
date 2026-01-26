@@ -4,9 +4,9 @@
 class port_b_agent extends uvm_agent;
     `uvm_component_utils(port_b_agent)
 
-    port_a_driver drv;
-    port_a_monitor mon;
-    port_a_sequencer seqr;
+    port_b_driver drv;
+    port_b_monitor mon;
+    port_b_sequencer seqr;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);

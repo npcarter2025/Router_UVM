@@ -32,9 +32,9 @@ class port_b_driver extends uvm_driver #(port_b_item);
         vif.drv_cb_Port_B.valid_b <= '0;
 
         forever begin 
-            `seq_item_port.get_next_item(req);
+            seq_item_port.get_next_item(req);
 
-            `uvm_info("PORT_B_DRV", $sformatf("Driving $s", req.convert2string()), UVM_MEDIUM)
+            `uvm_info("PORT_B_DRV", $sformatf("Driving %s", req.convert2string()), UVM_MEDIUM)
 
 
             vif.drv_cb_Port_B.data_b <= req.data_b;
