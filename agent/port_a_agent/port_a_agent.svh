@@ -17,7 +17,10 @@ class port_a_agent extends uvm_agent;
 
         drv = port_a_driver::type_id::create("drv", this);
         mon = port_a_monitor::type_id::create("mon", this);
+        
         seqr = port_a_sequencer::type_id::create("seqr", this);
+
+
 
     endfunction
 
