@@ -6,3 +6,11 @@ docs/
 *.log
 simv
 csrc
+
+coverage_report/
+
+coverage.vdb
+
+.fsm.sch.verilog.xml
+
+*.xml
