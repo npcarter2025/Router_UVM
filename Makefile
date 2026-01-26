@@ -33,6 +33,11 @@ SIM_FLAGS = +UVM_TESTNAME=$(TEST) \
             +UVM_VERBOSITY=$(UVM_VERBOSITY) \
             -l $(LOG_FILE)
 
+# Coverage flags for VCS
+COV_FLAGS = -cm line+cond+fsm+tgl+branch+assert
+COV_FLAGS += -cm_dir coverage.vdb
+COV_FLAGS += -cm_name test_$(TEST)
+
 # ============================================================================
 # Targets
 # ============================================================================
@@ -45,14 +50,14 @@ compile:
 	@echo "============================================"
 	@echo "Compiling UVM Testbench..."
 	@echo "============================================"
-	$(VCS) $(VCS_FLAGS) $(ALL_SOURCES) -o $(SIMV)
+	$(VCS) $(VCS_FLAGS) $(COV_FLAGS) $(ALL_SOURCES) -o $(SIMV)
 
 # Run simulation
 run:
 	@echo "============================================"
 	@echo "Running test: $(TEST)"
 	@echo "============================================"
-	./$(SIMV) $(SIM_FLAGS)
+	./$(SIMV) $(SIM_FLAGS) -cm line+cond+fsm+tgl
 
 # Run with medium verbosity
 run_medium:
@@ -76,7 +81,7 @@ clean:
 
 # Full clean (including waveforms)
 cleanall: clean
-	rm -rf *.vcd *.vpd *.fsdb novas* verdiLog
+	rm -rf *.vcd *.vpd *.fsdb novas* verdiLog 
 
 # View waveforms (if dump.vcd exists)
 waves:
@@ -86,6 +91,19 @@ waves:
 	else \
 		echo "No waveform file found. Run simulation first."; \
 	fi
+
+report:
+	urg -dir coverage.vdb -report coverage_report
+
+html:
+	@echo "Starting HTTP server on port 8000..."
+	@cd coverage_report && python3 -m http.server 8000 &
+	@sleep 2
+	@echo "Opening Firefox..."
+	@if [ -z "$$DISPLAY" ]; then export DISPLAY=:0.0; fi; \
+	firefox http://localhost:8000/dashboard.html &
+	@echo "Server running. Press Ctrl+C to stop, or run: pkill -f 'python3 -m http.server 8000'"
+
 
 # ============================================================================
 # Help
@@ -104,6 +122,7 @@ help:
 	@echo "  make clean        - Remove generated files"
 	@echo "  make cleanall     - Remove all generated files"
 	@echo "  make waves        - Open waveform viewer"
+	@echo "  make report	   - Generate the coverage report"
 	@echo "  make help         - Show this help"
 	@echo ""
 	@echo "Options:"
@@ -116,4 +135,4 @@ help:
 	@echo "  make run UVM_VERBOSITY=UVM_HIGH"
 	@echo ""
 
-.PHONY: all compile run run_medium run_high clean cleanall waves help
+.PHONY: all compile run run_medium run_high clean cleanall waves report html help

@@ -17,6 +17,8 @@ class router_env extends uvm_env;
     router_virtual_sequencer m_vseqr;
     router_scoreboard m_scoreboard;
 
+    router_coverage m_coverage;
+
     function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction
@@ -38,6 +40,8 @@ class router_env extends uvm_env;
         m_reg_adapter = router_reg_adapter::type_id::create("m_reg_adapter");
 
         m_predictor = uvm_reg_predictor#(reg_item)::type_id::create("m_predictor", this);
+
+        m_coverage = router_coverage::type_id::create("m_coverage", this);
 
 
     endfunction
@@ -61,6 +65,12 @@ class router_env extends uvm_env;
         m_predictor.map     = m_reg_model.default_map;
         m_predictor.adapter = m_reg_adapter;
         m_reg_agent.mon.ap.connect(m_predictor.bus_in);
+        
+        // connect coverage to monitors
+        m_port_a_agent.mon.ap.connect(m_coverage.port_a_export);
+        m_port_b_agent.mon.ap.connect(m_coverage.port_b_export);
+        m_output_agent.monitor.ap.connect(m_coverage.output_export);
+        m_reg_agent.mon.ap.connect(m_coverage.reg_export);
 
         
     endfunction
