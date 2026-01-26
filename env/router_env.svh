@@ -32,6 +32,10 @@ class router_env extends uvm_env;
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
 
+        m_vseqr.p_port_a_seqr = m_port_a_agent;
+        m_vseqr.p_port_b_seqr = m_port_b_agent;
+        m_vseqr.p_reg_seqr = m_reg_agent;
+
     endfunction
 endclass
 
