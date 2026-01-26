@@ -25,9 +25,13 @@ VCS_FLAGS = -sverilog \
             -ntb_opts uvm-1.2 \
             +incdir+.
 
+# Log file
+LOG_FILE ?= sim.log
+
 # Simulation flags
 SIM_FLAGS = +UVM_TESTNAME=$(TEST) \
-            +UVM_VERBOSITY=$(UVM_VERBOSITY)
+            +UVM_VERBOSITY=$(UVM_VERBOSITY) \
+            -l $(LOG_FILE)
 
 # ============================================================================
 # Targets
@@ -105,6 +109,7 @@ help:
 	@echo "Options:"
 	@echo "  TEST=<test_name>           - Specify test (default: router_base_test)"
 	@echo "  UVM_VERBOSITY=<level>      - UVM_NONE/LOW/MEDIUM/HIGH/FULL"
+	@echo "  LOG_FILE=<filename>        - Log file name (default: sim.log)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make TEST=router_base_test"

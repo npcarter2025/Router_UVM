@@ -24,6 +24,9 @@ class router_base_test extends uvm_test;
         vseq = collision_vseq::type_id::create("vseq");
         vseq.start(m_env.m_vseqr);
 
+        // Drain time: wait for final transactions to complete
+        #100ns;
+
         `uvm_info(get_type_name(), "Test complete", UVM_LOW)
         phase.drop_objection(this);
     endtask
