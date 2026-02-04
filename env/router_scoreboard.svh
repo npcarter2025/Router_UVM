@@ -5,6 +5,7 @@
 `uvm_analysis_imp_decl(_port_a)
 `uvm_analysis_imp_decl(_port_b)
 `uvm_analysis_imp_decl(_output)
+`uvm_analysis_imp_decl(_reg)
 
 class router_scoreboard extends uvm_scoreboard;
 
@@ -14,6 +15,7 @@ class router_scoreboard extends uvm_scoreboard;
     uvm_analysis_imp_port_a #(port_a_item, router_scoreboard) port_a_imp;
     uvm_analysis_imp_port_b #(port_b_item, router_scoreboard) port_b_imp;
     uvm_analysis_imp_output #(output_item, router_scoreboard) output_imp;
+    uvm_analysis_imp_reg    #(reg_item,    router_scoreboard) reg_imp;
 
     // Expected queue - stores expected data for each output port
     // Using a struct to handle both port_a and port_b items
@@ -38,6 +40,7 @@ class router_scoreboard extends uvm_scoreboard;
         port_a_imp = new("port_a_imp", this);
         port_b_imp = new("port_b_imp", this);
         output_imp = new("output_imp", this);
+        reg_imp    = new("reg_imp",    this);
     endfunction
 
     // Called when port_a_monitor observes a transaction
@@ -80,6 +83,22 @@ class router_scoreboard extends uvm_scoreboard;
         end
     endfunction
 
+    function void write_reg(reg_item item);
+        `uvm_info("SB", $sformatf("Reg sent: %s", item.convert2string()), UVM_MEDIUM)
+
+        if (item.is_write()) begin
+            expected_t exp;
+            exp.data = item.reg_wdata;
+            exp.addr = item.reg_addr;
+            exp.source = "reg";
+
+            expected_queue[item.reg_addr].push_back(exp);
+
+            `uvm_info("SB", $sformatf("Added to expected_queue[%0d], queue size=%0d", item.reg_addr, expected_queue[item.reg_addr].size()), UVM_HIGH)
+        end
+
+
+    endfunction
     // Called when output_monitor observes a transaction
     function void write_output(output_item item);
         `uvm_info("SB", $sformatf("Output received: %s", item.convert2string()), UVM_MEDIUM)
