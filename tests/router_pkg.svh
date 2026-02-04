@@ -77,6 +77,8 @@ package router_pkg;
     // Tests
     //----------------------------------------------------------
     `include "tests/router_base_test.svh"
+    `include "tests/disable_test.svh"
+    `include "tests/priority_test.svh"
 
 endpackage
 

@@ -79,6 +79,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf ucli.key vc_hdrs.h .vcsmx_rebuild DVEfiles
 	rm -rf AN.DB novas* verdiLog
+	rm -rf *.log *.vcd
 
 # View waveforms (if dump.vcd exists)
 waves:

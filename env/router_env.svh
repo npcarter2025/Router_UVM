@@ -41,6 +41,8 @@ class router_env extends uvm_env;
         m_port_a_agent.mon.ap.connect(m_scoreboard.port_a_imp);
         m_port_b_agent.mon.ap.connect(m_scoreboard.port_b_imp);
         m_output_agent.monitor.ap.connect(m_scoreboard.output_imp);
+
+        m_reg_agent.mon.ap.connect(m_scoreboard.reg_imp);
     endfunction
 endclass
 
