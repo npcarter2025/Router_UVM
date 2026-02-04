@@ -4,7 +4,10 @@
 
 # Tool settings
 VCS = vcs
-SIMV = simv
+
+# Build directory
+BUILD_DIR = build
+SIMV = $(BUILD_DIR)/simv
 
 # UVM settings
 UVM_VERBOSITY ?= UVM_LOW
@@ -23,10 +26,11 @@ VCS_FLAGS = -sverilog \
             -full64 \
             -timescale=1ns/1ps \
             -ntb_opts uvm-1.2 \
-            +incdir+.
+            +incdir+. \
+            -Mdir=$(BUILD_DIR)/csrc
 
 # Log file
-LOG_FILE ?= sim.log
+LOG_FILE ?= $(BUILD_DIR)/sim.log
 
 # Simulation flags
 SIM_FLAGS = +UVM_TESTNAME=$(TEST) \
@@ -45,6 +49,7 @@ compile:
 	@echo "============================================"
 	@echo "Compiling UVM Testbench..."
 	@echo "============================================"
+	@mkdir -p $(BUILD_DIR)
 	$(VCS) $(VCS_FLAGS) $(ALL_SOURCES) -o $(SIMV)
 
 # Run simulation
@@ -71,16 +76,16 @@ run_high:
 # Clean generated files
 clean:
 	@echo "Cleaning..."
-	rm -rf $(SIMV) $(SIMV).daidir csrc *.log *.vpd *.vcd
+	rm -rf $(BUILD_DIR)
 	rm -rf ucli.key vc_hdrs.h .vcsmx_rebuild DVEfiles
-
-# Full clean (including waveforms)
-cleanall: clean
-	rm -rf *.vcd *.vpd *.fsdb novas* verdiLog
+	rm -rf AN.DB novas* verdiLog
 
 # View waveforms (if dump.vcd exists)
 waves:
-	@if [ -f dump.vcd ]; then \
+	@if [ -f $(BUILD_DIR)/dump.vcd ]; then \
+		echo "Opening waveform viewer..."; \
+		dve -vpd $(BUILD_DIR)/dump.vcd &; \
+	elif [ -f dump.vcd ]; then \
 		echo "Opening waveform viewer..."; \
 		dve -vpd dump.vcd &; \
 	else \
@@ -116,4 +121,4 @@ help:
 	@echo "  make run UVM_VERBOSITY=UVM_HIGH"
 	@echo ""
 
-.PHONY: all compile run run_medium run_high clean cleanall waves help
+.PHONY: all compile run run_medium run_high clean waves help

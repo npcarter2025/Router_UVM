@@ -1,8 +1,25 @@
 docs/
+build/
 
+*.log
 *.vcd
 *.daidir
 *.key
-*.log
-simv
-csrc
+ucli.key
+vc_hdrs.h
+.vcsmx_rebuild
+DVEfiles/
+AN.DB/
+
+# Waveform files (if not in build/)
+*.vcd
+*.vpd
+*.fsdb
+
+# Verdi/DVE files
+novas*
+verdiLog/
+
+# Coverage database
+*.vdb
+*.xml

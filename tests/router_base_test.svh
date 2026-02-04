@@ -15,6 +15,13 @@ class router_base_test extends uvm_test;
         m_env = router_env::type_id::create("m_env", this);
     endfunction
 
+    virtual function void end_of_elaboration_phase(uvm_phase phase);
+        super.end_of_elaboration_phase(phase);
+        
+        uvm_top.print_topology();
+
+    endfunction
+
     virtual task run_phase(uvm_phase phase);
         collision_vseq vseq;
 
@@ -30,6 +37,8 @@ class router_base_test extends uvm_test;
         `uvm_info(get_type_name(), "Test complete", UVM_LOW)
         phase.drop_objection(this);
     endtask
+
+
 
 endclass
 
