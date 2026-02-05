@@ -9,7 +9,7 @@ class ctrl_reg extends uvm_reg;
     rand uvm_reg_field reserved;        // bits 31:2
 
     function new(string name = "ctrl_reg");
-        super.new(name, 32, UVM_NO_COVERAGE);
+        super.new(name, 32, UVM_CVR_ALL);
     endfunction
 
     virtual function void build(); // Note that this is NOT build_phase

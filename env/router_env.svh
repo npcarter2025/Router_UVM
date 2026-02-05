@@ -33,6 +33,7 @@ class router_env extends uvm_env;
         m_scoreboard = router_scoreboard::type_id::create("m_scoreboard", this);
 
         m_reg_model = router_reg_block::type_id::create("m_reg_model");
+        m_reg_model.set_coverage(UVM_CVR_ALL);  // Enable coverage before building
         m_reg_model.build();
         m_reg_model.lock_model();
 

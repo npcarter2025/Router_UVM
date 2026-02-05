@@ -7,7 +7,7 @@ class collision_cnt_reg extends uvm_reg;
     rand uvm_reg_field count;
 
     function new(string name = "collision_cnt_reg");
-        super.new(name, 32, UVM_NO_COVERAGE);
+        super.new(name, 32, UVM_CVR_ALL);
     endfunction
 
     virtual function void build();
