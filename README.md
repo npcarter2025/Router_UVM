@@ -2,6 +2,11 @@
 In this repository, I made a UVM environment from scratch for a Dual-Port Router.
 My goal was to practice with Virtual Sequencers, RAL, Scoreboards, Coverage, and DPI-C. 
 
+# Testbench Architecture
+High Level Overview
+![Router Architecture](docs/diagrams/diagram_2.png "I made this with PlantUML")
+![Router Architecture](docs/diagrams/diagram_1.png "I made this with mermaid.js")
+
 
 ## Key Verification Features
 
@@ -26,11 +31,6 @@ I have already made rough drafts for a DPI-C Golden Model, and a Coverage class,
 ---
 
 Below are some good debugging patterns that I am trying to memorize.
-
-# Testbench Architecture
-High Level Overview
-![Router Architecture](docs/diagrams/diagram_2.png "I made this with PlantUML")
-![Router Architecture](docs/diagrams/diagram_1.png "I made this with mermaid.js")
 
 
 # Current Structure
