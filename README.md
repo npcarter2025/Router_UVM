@@ -12,6 +12,7 @@ My goal was to practice with Virtual Sequencers, RAL, Scoreboards, Coverage, and
 - **Register Abstraction Layer (RAL)**: Integrated a full register model supporting Frontdoor/Backdoor access for DUT configuration and status tracking.
 
 - **Scalable Scoreboard**: Utilized `uvm_analysis_imp_decl` to create independent implementation ports
+- For simulation, I used Synopsys VCS with a Makefile script.
 
 ## Current Roadmap
 - [x] Virtual Sequencer & Multi-Agent Connectivity
