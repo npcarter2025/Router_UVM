@@ -13,24 +13,24 @@ My goal was to practice with Virtual Sequencers, RAL, Scoreboards, Coverage, and
 
 - **Scalable Scoreboard**: Utilized `uvm_analysis_imp_decl` to create independent implementation ports
 
-## Final Integration
-I have already made rough drafts for a DPI-C Golden Model, and a Coverage class, which are both on new branches named `feature/dpi-c` and `feature/coverage`
-
 ## Current Roadmap
 - [x] Virtual Sequencer & Multi-Agent Connectivity
 - [x] RAL Model & Adapter Implementation
 - [ ] DPI-C Golden Reference Model (branch: `feature/dpi-c`)
 - [ ] Functional Coverage (branch: `feature/coverage`)
 
+## Final Integration
+I have already made rough drafts for a DPI-C Golden Model, and a Coverage class, which are both on new branches named `feature/dpi-c` and `feature/coverage` 
+
 ---
 
 Below are some good debugging patterns that I am trying to memorize.
 
 # Testbench Architecture
-![Router Architecture](docs/diagrams/diagram_2.png)
-![Router Architecture](docs/diagrams/diagram_1.png "from mermaid.js")
+High Level Overview
+![Router Architecture](docs/diagrams/diagram_2.png "I made this with PlantUML")
+![Router Architecture](docs/diagrams/diagram_1.png "I made this with mermaid.js")
 
-![Router Architecture](docs/diagrams/image_diagram_simplified.png)
 
 # Current Structure
 ```
