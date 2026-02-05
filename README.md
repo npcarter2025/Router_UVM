@@ -1,10 +1,29 @@
-# UVM Testbench for a Dual_Port Router
+# UVM Testbench: 4-Agent Dual-Port Router
+In this repository, I made a UVM environment from scratch for a Dual-Port Router.
+My goal was to practice with Virtual Sequencers, RAL, Scoreboards, Coverage, and DPI-C. 
 
-I made this so I could practice writing Virtual Sequencers, and RAL.
 
-The DUT is a simple Dual-Port Router, with additional Control Registers, that I am using RAL on.
+## Key Verification Features
 
-I'm thinking I'll add a DPI-C Golden Reference Model when I'm done.
+- **4-Agent Architecture**: Includes two active input agents (Port A/B), an active Register/Control agent, and a passive output monitor.
+
+- **Virtual Sequencing**: Implemented a `router_virtual_sequencer` to coordinate complex traffic scenarios, including port collisions and priority arbitration.
+
+- **Register Abstraction Layer (RAL)**: Integrated a full register model supporting Frontdoor/Backdoor access for DUT configuration and status tracking.
+
+- **Scalable Scoreboard**: Utilized `uvm_analysis_imp_decl` to create independent implementation ports
+
+## Final Integration
+I have already made rough drafts for a DPI-C Golden Model, and a Coverage class, which are both on new branches named `feature/dpi-c` and `feature/coverage`
+
+## Current Roadmap
+- [x] Virtual Sequencer & Multi-Agent Connectivity
+- [x] RAL Model & Adapter Implementation
+- [ ] DPI-C Golden Reference Model (branch: `feature/dpi-c`)
+- [ ] Functional Coverage (branch: `feature/coverage`)
+
+---
+
 Below are some good debugging patterns that I am trying to memorize.
 
 # Testbench Architecture
@@ -15,7 +34,7 @@ Below are some good debugging patterns that I am trying to memorize.
 
 # Current Structure
 ```
-.
+Router_UVM
 ├── Makefile
 ├── README.md
 ├── agent
@@ -42,16 +61,9 @@ Below are some good debugging patterns that I am trying to memorize.
 │       ├── reg_monitor.svh
 │       └── reg_sequencer.svh
 ├── docs
-│   ├── Advanced_UVM_Features.md
-│   ├── RAL_advanced.md
-│   ├── coverage_class_guide.md
-│   ├── image copy 2.png
-│   ├── image copy 3.png
-│   ├── image copy.png
-│   ├── image.png
-│   └── testbench_plan.md
+│   ├── diagrams/...
+│   └── test_plans/...
 ├── env
-│   ├── router_coverage.svh
 │   ├── router_env.svh
 │   ├── router_scoreboard.svh
 │   └── router_virtual_sequencer.svh
@@ -76,15 +88,14 @@ Below are some good debugging patterns that I am trying to memorize.
 │   └── dual_port_router_if.sv
 ├── tb
 │   └── tb_top.sv
-├── tests
-│   ├── back_to_back_test.svh
-│   ├── backdoor_test.svh
-│   ├── disable_test.svh
-│   ├── priority_test.svh
-│   ├── ral_sanity_test.svh
-│   ├── router_base_test.svh
-│   └── router_pkg.svh
-└── transaction
+└── tests
+    ├── back_to_back_test.svh
+    ├── backdoor_test.svh
+    ├── disable_test.svh
+    ├── priority_test.svh
+    ├── ral_sanity_test.svh
+    ├── router_base_test.svh
+    └── router_pkg.svh
 ```
 
 
