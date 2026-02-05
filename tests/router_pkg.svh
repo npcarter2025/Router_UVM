@@ -72,6 +72,7 @@ package router_pkg;
     `include "seq/collision_vseq.svh"
     `include "seq/priority_vseq.svh"
     `include "seq/disable_vseq.svh"
+    `include "seq/back_to_back_vseq.svh"
 
     //----------------------------------------------------------
     // Tests
@@ -79,6 +80,7 @@ package router_pkg;
     `include "tests/router_base_test.svh"
     `include "tests/disable_test.svh"
     `include "tests/priority_test.svh"
+    `include "tests/back_to_back_test.svh"
 
 endpackage
 
