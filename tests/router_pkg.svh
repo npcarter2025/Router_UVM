@@ -88,6 +88,7 @@ package router_pkg;
     `include "seq/disable_vseq.svh"
     `include "seq/back_to_back_vseq.svh"
     `include "seq/ral_sanity_vseq.svh"
+    `include "seq/backdoor_test_vseq.svh"
 
     //----------------------------------------------------------
     // Tests
@@ -97,6 +98,7 @@ package router_pkg;
     `include "tests/priority_test.svh"
     `include "tests/back_to_back_test.svh"
     `include "tests/ral_sanity_test.svh"
+    `include "tests/backdoor_test.svh"
 
 endpackage
 

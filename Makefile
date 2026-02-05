@@ -27,7 +27,8 @@ VCS_FLAGS = -sverilog \
             -timescale=1ns/1ps \
             -ntb_opts uvm-1.2 \
             +incdir+. \
-            -Mdir=$(BUILD_DIR)/csrc
+            -Mdir=$(BUILD_DIR)/csrc \
+			+acc+rw
 
 # Log file
 LOG_FILE ?= $(BUILD_DIR)/sim.log

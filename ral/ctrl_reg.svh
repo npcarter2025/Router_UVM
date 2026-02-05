@@ -23,6 +23,10 @@ class ctrl_reg extends uvm_reg;
 
         reserved = uvm_reg_field::type_id::create("reserved");
         reserved.configure(this, 30, 2, "RO", 1, 30'h0, 1, 0, 0);
+
+        // Adding HDL path for backdoor access
+        add_hdl_path_slice("ctrl_reg", 0, 32); //
+
     endfunction
 
 endclass

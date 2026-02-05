@@ -15,7 +15,10 @@ class collision_cnt_reg extends uvm_reg;
         count.configure(this, 32, 0, "RO", 0, 32'h0, 1, 0, 0); // Read-only
 
         //configure() args:  parent, size(bits), lsb, access, volatile, reset_value, has_reset, is_rand, individually_accessible
+        
 
+        // Adding HDL path for backdoor access
+        add_hdl_path_slice("collision_cnt", 0, 32);
     endfunction
 
 endclass

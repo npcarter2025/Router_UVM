@@ -34,6 +34,10 @@ class router_env extends uvm_env;
 
         m_reg_model = router_reg_block::type_id::create("m_reg_model");
         m_reg_model.build();
+        m_reg_model.lock_model();
+
+        // Set root HDL path
+        m_reg_model.set_hdl_path_root("tb_top.dut");
 
         m_reg_adapter = router_reg_adapter::type_id::create("m_reg_adapter");
 
