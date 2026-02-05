@@ -7,6 +7,89 @@ The DUT is a simple Dual-Port Router, with additional Control Registers, that I 
 I'm thinking I'll add a DPI-C Golden Reference Model when I'm done.
 Below are some good debugging patterns that I am trying to memorize.
 
+# Testbench Architecture
+![Router Architecture](docs/diagrams/diagram_2.png)
+![Router Architecture](docs/diagrams/diagram_1.png "from mermaid.js")
+
+![Router Architecture](docs/diagrams/image_diagram_simplified.png)
+
+# Current Structure
+```
+.
+├── Makefile
+├── README.md
+├── agent
+│   ├── output_agent
+│   │   ├── output_agent.svh
+│   │   ├── output_item.svh
+│   │   └── output_monitor.svh
+│   ├── port_a_agent
+│   │   ├── port_a_agent.svh
+│   │   ├── port_a_driver.svh
+│   │   ├── port_a_item.svh
+│   │   ├── port_a_monitor.svh
+│   │   └── port_a_sequencer.svh
+│   ├── port_b_agent
+│   │   ├── port_b_agent.svh
+│   │   ├── port_b_driver.svh
+│   │   ├── port_b_item.svh
+│   │   ├── port_b_monitor.svh
+│   │   └── port_b_sequencer.svh
+│   └── reg_agent
+│       ├── reg_agent.svh
+│       ├── reg_driver.svh
+│       ├── reg_item.svh
+│       ├── reg_monitor.svh
+│       └── reg_sequencer.svh
+├── docs
+│   ├── Advanced_UVM_Features.md
+│   ├── RAL_advanced.md
+│   ├── coverage_class_guide.md
+│   ├── image copy 2.png
+│   ├── image copy 3.png
+│   ├── image copy.png
+│   ├── image.png
+│   └── testbench_plan.md
+├── env
+│   ├── router_coverage.svh
+│   ├── router_env.svh
+│   ├── router_scoreboard.svh
+│   └── router_virtual_sequencer.svh
+├── ral
+│   ├── collision_cnt_reg.svh
+│   ├── ctrl_reg.svh
+│   ├── router_reg_adapter.svh
+│   └── router_reg_block.svh
+├── seq
+│   ├── back_to_back_vseq.svh
+│   ├── backdoor_test_vseq.svh
+│   ├── collision_vseq.svh
+│   ├── disable_vseq.svh
+│   ├── port_a_base_sequence.svh
+│   ├── port_b_base_sequence.svh
+│   ├── priority_vseq.svh
+│   ├── ral_sanity_vseq.svh
+│   ├── reg_base_sequence.svh
+│   └── router_base_vseq.svh
+├── src
+│   ├── dual_port_router.sv
+│   └── dual_port_router_if.sv
+├── tb
+│   └── tb_top.sv
+├── tests
+│   ├── back_to_back_test.svh
+│   ├── backdoor_test.svh
+│   ├── disable_test.svh
+│   ├── priority_test.svh
+│   ├── ral_sanity_test.svh
+│   ├── router_base_test.svh
+│   └── router_pkg.svh
+└── transaction
+```
+
+
+
+
 # UVM Debugging Grep Patterns
 
 Quick reference for filtering UVM simulation logs.
