@@ -58,8 +58,8 @@ class reg_driver extends uvm_driver #(reg_item);
 
             `uvm_info("REG_DRV", $sformatf("Completed: %s", req.convert2string()), UVM_MEDIUM)
 
-            // Signal sequencer we're done
-            seq_item_port.item_done();
+            // Signal sequencer we're done and send response back
+            seq_item_port.item_done(req);
         end
     endtask
 

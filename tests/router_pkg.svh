@@ -52,6 +52,20 @@ package router_pkg;
     // Virtual Sequencer
     //----------------------------------------------------------
     `include "env/router_virtual_sequencer.svh"
+        
+    //----------------------------------------------------------
+    // RAL (Register Abstraction Layer)
+    //----------------------------------------------------------
+    `include "ral/ctrl_reg.svh"
+    `include "ral/collision_cnt_reg.svh"
+    `include "ral/router_reg_block.svh"
+    `include "ral/router_reg_adapter.svh"
+
+    //----------------------------------------------------------
+    // Coverage
+    //----------------------------------------------------------
+    // Note: Coverage not implemented on this branch yet
+    // `include "env/router_coverage.svh"
 
     //----------------------------------------------------------
     // Environment
@@ -73,6 +87,7 @@ package router_pkg;
     `include "seq/priority_vseq.svh"
     `include "seq/disable_vseq.svh"
     `include "seq/back_to_back_vseq.svh"
+    `include "seq/ral_sanity_vseq.svh"
 
     //----------------------------------------------------------
     // Tests
@@ -81,6 +96,7 @@ package router_pkg;
     `include "tests/disable_test.svh"
     `include "tests/priority_test.svh"
     `include "tests/back_to_back_test.svh"
+    `include "tests/ral_sanity_test.svh"
 
 endpackage
 

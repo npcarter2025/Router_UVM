@@ -12,6 +12,11 @@ class router_env extends uvm_env;
     router_virtual_sequencer m_vseqr;
     router_scoreboard m_scoreboard;
 
+    //RAL components
+    router_reg_block                m_reg_model;
+    router_reg_adapter              m_reg_adapter;
+    uvm_reg_predictor #(reg_item)   m_predictor;
+
     function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction
@@ -26,6 +31,13 @@ class router_env extends uvm_env;
 
         m_vseqr = router_virtual_sequencer::type_id::create("m_vseqr", this);
         m_scoreboard = router_scoreboard::type_id::create("m_scoreboard", this);
+
+        m_reg_model = router_reg_block::type_id::create("m_reg_model");
+        m_reg_model.build();
+
+        m_reg_adapter = router_reg_adapter::type_id::create("m_reg_adapter");
+
+        m_predictor = uvm_reg_predictor#(reg_item)::type_id::create("m_predictor", this);
 
     endfunction
 
@@ -43,6 +55,18 @@ class router_env extends uvm_env;
         m_output_agent.monitor.ap.connect(m_scoreboard.output_imp);
 
         m_reg_agent.mon.ap.connect(m_scoreboard.reg_imp);
+
+        m_reg_model.default_map.set_sequencer(m_reg_agent.seqr, m_reg_adapter);
+        m_reg_model.default_map.set_auto_predict(0);  // Disable - use predictor instead
+
+        // Connect predictor to update mirror from observed bus transactions
+        m_predictor.map = m_reg_model.default_map;
+        m_predictor.adapter = m_reg_adapter;
+        m_reg_agent.mon.ap.connect(m_predictor.bus_in);
+        
+        // Initialize register mirror to reset values (software model only)
+        m_reg_model.reset();
+        
     endfunction
 endclass
 
