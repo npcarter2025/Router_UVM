@@ -2,8 +2,7 @@
 `define ROUTER_SCOREBOARD_SVH
 
 // Declare analysis imp macros BEFORE the class
-`uvm_analysis_imp_decl(_port_a)
-`uvm_analysis_imp_decl(_port_b)
+// Note: _port_a and _port_b are already declared in router_coverage.svh
 `uvm_analysis_imp_decl(_output)
 //`uvm_analysis_imp_decl(_reg)
 
@@ -19,6 +18,8 @@ class router_scoreboard extends uvm_scoreboard;
 
     // Adding RAL COMPONENTS
     router_reg_block reg_model;
+
+    router_coverage m_coverage;
 
     // // Tracking Register State here:
     // bit global_enable;
@@ -37,6 +38,10 @@ class router_scoreboard extends uvm_scoreboard;
     // Counters
     int match_count;
     int mismatch_count;
+
+    // Collision tracking flags
+    bit got_port_a;
+    bit got_port_b;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -73,6 +78,8 @@ class router_scoreboard extends uvm_scoreboard;
             return;
         end
 
+        // Track for collision detection
+        got_port_a = 1;
         
         // Only add to expected if transaction was accepted
         if (item.ready_a) begin
@@ -99,6 +106,9 @@ class router_scoreboard extends uvm_scoreboard;
             return;
         end
 
+        // Track for collision detection
+        got_port_b = 1;
+        
         // Only add to expected if transaction was accepted
         if (item.ready_b) begin
             expected_t exp;
@@ -117,6 +127,8 @@ class router_scoreboard extends uvm_scoreboard;
 
     // Called when output_monitor observes a transaction
     function void write_output(output_item item);
+        bit collision_detected;
+        
         `uvm_info("SB", $sformatf("Output received: %s", item.convert2string()), UVM_MEDIUM)
 
         // Check if we expected anything on this output port
@@ -126,6 +138,17 @@ class router_scoreboard extends uvm_scoreboard;
             mismatch_count++;
             return;
         end
+        
+        // Detect collision: both ports were active
+        collision_detected = (got_port_a && got_port_b);
+        
+        // Sample the collision state 
+        // Transitions will be captured automatically across multiple samples
+        m_coverage.sample_collision_scenario(collision_detected);
+        
+        // Reset collision flags for next transaction
+        got_port_a = 0;
+        got_port_b = 0;
 
         begin
             expected_t exp_item;

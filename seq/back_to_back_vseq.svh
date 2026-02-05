@@ -4,7 +4,7 @@
 class back_to_back_vseq extends router_base_vseq;
     `uvm_object_utils(back_to_back_vseq)
 
-    int num_transactions = 50;
+    int num_transactions = 500;
 
     function new(string name = "back_to_back_vseq");
         super.new(name);

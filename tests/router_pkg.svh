@@ -52,7 +52,12 @@ package router_pkg;
     `include "ral/router_reg_adapter.svh"
 
     //----------------------------------------------------------
-    // Scoreboard (needs RAL types)
+    // Coverage (must come before scoreboard)
+    //----------------------------------------------------------
+    `include "env/router_coverage.svh"
+
+    //----------------------------------------------------------
+    // Scoreboard (needs RAL types and coverage)
     //----------------------------------------------------------
     `include "env/router_scoreboard.svh"
 
@@ -60,12 +65,6 @@ package router_pkg;
     // Virtual Sequencer
     //----------------------------------------------------------
     `include "env/router_virtual_sequencer.svh"
-
-    //----------------------------------------------------------
-    // Coverage
-    //----------------------------------------------------------
-    // Note: Coverage not implemented on this branch yet
-    // `include "env/router_coverage.svh"
 
     //----------------------------------------------------------
     // Environment
@@ -89,6 +88,7 @@ package router_pkg;
     `include "seq/back_to_back_vseq.svh"
     `include "seq/ral_sanity_vseq.svh"
     `include "seq/backdoor_test_vseq.svh"
+    `include "seq/directed_data_vseq.svh"
 
     //----------------------------------------------------------
     // Tests
@@ -99,6 +99,7 @@ package router_pkg;
     `include "tests/back_to_back_test.svh"
     `include "tests/ral_sanity_test.svh"
     `include "tests/backdoor_test.svh"
+    `include "tests/comprehensive_coverage_test.svh"
 
 endpackage
 

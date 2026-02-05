@@ -76,6 +76,13 @@ run_high:
 	@echo "============================================"
 	./$(SIMV) $(SIM_FLAGS) +UVM_VERBOSITY=UVM_HIGH
 
+# Run comprehensive coverage test
+run_coverage:
+	@echo "============================================"
+	@echo "Running comprehensive coverage test"
+	@echo "============================================"
+	./$(SIMV) +UVM_TESTNAME=comprehensive_coverage_test +UVM_VERBOSITY=UVM_LOW -l $(BUILD_DIR)/coverage_sim.log
+
 # Clean generated files
 clean:
 	@echo "Cleaning..."
@@ -110,6 +117,7 @@ help:
 	@echo "  make run          - Run simulation (default test)"
 	@echo "  make run_medium   - Run with UVM_MEDIUM verbosity"
 	@echo "  make run_high     - Run with UVM_HIGH verbosity"
+	@echo "  make run_coverage - Run comprehensive coverage test"
 	@echo "  make clean        - Remove generated files"
 	@echo "  make cleanall     - Remove all generated files"
 	@echo "  make waves        - Open waveform viewer"
@@ -125,4 +133,4 @@ help:
 	@echo "  make run UVM_VERBOSITY=UVM_HIGH"
 	@echo ""
 
-.PHONY: all compile run run_medium run_high clean waves help
+.PHONY: all compile run run_medium run_high run_coverage clean waves help

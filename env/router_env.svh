@@ -17,6 +17,8 @@ class router_env extends uvm_env;
     router_reg_adapter              m_reg_adapter;
     uvm_reg_predictor #(reg_item)   m_predictor;
 
+    router_coverage m_coverage;
+
     function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction
@@ -44,6 +46,8 @@ class router_env extends uvm_env;
 
         m_predictor = uvm_reg_predictor#(reg_item)::type_id::create("m_predictor", this);
 
+        m_coverage = router_coverage::type_id::create("m_coverage", this);
+
     endfunction
 
     function void connect_phase(uvm_phase phase);
@@ -61,6 +65,15 @@ class router_env extends uvm_env;
         
         // Pass RAL model handle to scoreboard (scoreboard queries mirror)
         m_scoreboard.reg_model = m_reg_model;
+
+        // Connect monitors to Coverage
+        m_port_a_agent.mon.ap.connect(m_coverage.port_a_imp);
+        m_port_b_agent.mon.ap.connect(m_coverage.port_b_imp);
+        m_output_agent.monitor.ap.connect(m_coverage.analysis_export);
+        // Pass the Register Model Handle
+        m_coverage.reg_model = m_reg_model;
+
+        m_scoreboard.m_coverage = m_coverage;
         
         // No longer need to connect reg_imp - scoreboard queries RAL mirror instead
         // m_reg_agent.mon.ap.connect(m_scoreboard.reg_imp);

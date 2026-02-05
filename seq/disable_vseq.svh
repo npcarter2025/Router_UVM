@@ -33,7 +33,7 @@ class disable_vseq extends router_base_vseq;
         `uvm_info(get_type_name(), "Phase 1: Sending traffic while ENABLED", UVM_MEDIUM)
         
         // Send 2 transactions on Port A - should complete successfully
-        repeat(2) begin
+        repeat(20) begin
             `uvm_do_on(port_a_seq, p_port_a_seqr)
         end
         
@@ -75,7 +75,7 @@ class disable_vseq extends router_base_vseq;
         `uvm_info(get_type_name(), "Phase 4: Sending traffic after RE-ENABLE", UVM_MEDIUM)
         
         // Send 2 transactions on Port B - should complete successfully
-        repeat(2) begin
+        repeat(20) begin
             `uvm_do_on(port_b_seq, p_port_b_seqr)
         end
 

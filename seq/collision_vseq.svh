@@ -6,7 +6,7 @@ class collision_vseq extends router_base_vseq;  // Extend base vseq for sequence
 
     // Configuration - set before starting sequence
     bit test_port_a_priority = 1;  // 1 = Port A wins, 0 = Port B wins
-    int num_collisions = 5;        // Number of collision attempts
+    int num_collisions = 50;        // Number of collision attempts
 
     function new(string name = "collision_vseq");
         super.new(name);
