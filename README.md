@@ -1,6 +1,6 @@
 # UVM Testbench: 4-Agent Dual-Port Router
 In this repository, I made a UVM environment from scratch for a Dual-Port Router.
-My goal was to practice with Virtual Sequencers, RAL, Scoreboards, Coverage, and DPI-C. 
+My goal was to create a scalable environment with Virtual Sequencers, RAL, Scoreboards, Coverage, and DPI-C. 
 
 # Testbench Architecture
 High Level Overview
