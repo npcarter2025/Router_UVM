@@ -5,7 +5,7 @@
 `uvm_analysis_imp_decl(_port_a)
 `uvm_analysis_imp_decl(_port_b)
 `uvm_analysis_imp_decl(_output)
-`uvm_analysis_imp_decl(_reg)
+//`uvm_analysis_imp_decl(_reg)
 
 class router_scoreboard extends uvm_scoreboard;
 
@@ -15,12 +15,14 @@ class router_scoreboard extends uvm_scoreboard;
     uvm_analysis_imp_port_a #(port_a_item, router_scoreboard) port_a_imp;
     uvm_analysis_imp_port_b #(port_b_item, router_scoreboard) port_b_imp;
     uvm_analysis_imp_output #(output_item, router_scoreboard) output_imp;
-    uvm_analysis_imp_reg    #(reg_item,    router_scoreboard) reg_imp;
+    //uvm_analysis_imp_reg    #(reg_item,    router_scoreboard) reg_imp;
 
+    // Adding RAL COMPONENTS
+    router_reg_block reg_model;
 
-    // Tracking Register State here:
-    bit global_enable;
-    bit port_priority;  // 0 = PortA, 1 = PortB
+    // // Tracking Register State here:
+    // bit global_enable;
+    // bit port_priority;  // 0 = PortA, 1 = PortB
 
     // Expected queue - stores expected data for each output port
     // Using a struct to handle both port_a and port_b items
@@ -45,32 +47,33 @@ class router_scoreboard extends uvm_scoreboard;
         port_a_imp = new("port_a_imp", this);
         port_b_imp = new("port_b_imp", this);
         output_imp = new("output_imp", this);
-        reg_imp    = new("reg_imp",    this);
+        //reg_imp    = new("reg_imp",    this);
 
         // initialize to reset values
-        global_enable = 1'b1;
-        port_priority = 1'b0;
+        // global_enable = 1'b1;
+        // port_priority = 1'b0;
     endfunction
 
-    function void write_reg(reg_item item);
-        if (item.is_write() && item.reg_addr == 4'h0) begin
-            global_enable = item.reg_wdata[0];
-            port_priority = item.reg_wdata[1];
+    // function void write_reg(reg_item item);
+    //     if (item.is_write() && item.reg_addr == 4'h0) begin
+    //         global_enable = item.reg_wdata[0];
+    //         port_priority = item.reg_wdata[1];
 
-            `uvm_info("SB", $sformatf("Register state updated: enable=%0b, priority=%s", global_enable, port_priority ? "Port B" : "Port A"), UVM_MEDIUM)
-        end
-    endfunction
+    //         `uvm_info("SB", $sformatf("Register state updated: enable=%0b, priority=%s", global_enable, port_priority ? "Port B" : "Port A"), UVM_MEDIUM)
+    //     end
+    // endfunction
 
 
     // Called when port_a_monitor observes a transaction
     function void write_port_a(port_a_item item);
         `uvm_info("SB", $sformatf("Port A sent: %s", item.convert2string()), UVM_MEDIUM)
-
-        if (!global_enable) begin
+        if (!reg_model.ctrl.global_enable.get_mirrored_value()) begin
+        //if (!global_enable) begin
             `uvm_info("SB", "Router disabled, ignoring Port A", UVM_HIGH)
             return;
         end
 
+        
         // Only add to expected if transaction was accepted
         if (item.ready_a) begin
             expected_t exp;
@@ -90,8 +93,8 @@ class router_scoreboard extends uvm_scoreboard;
     // Called when port_b_monitor observes a transaction
     function void write_port_b(port_b_item item);
         `uvm_info("SB", $sformatf("Port B sent: %s", item.convert2string()), UVM_MEDIUM)
-
-        if (!global_enable) begin
+        if (!reg_model.ctrl.global_enable.get_mirrored_value()) begin
+        //if (!global_enable) begin
             `uvm_info("SB", "Router disabled, ignoring Port B", UVM_HIGH)
             return;
         end
@@ -123,7 +126,6 @@ class router_scoreboard extends uvm_scoreboard;
             mismatch_count++;
             return;
         end
-
 
         begin
             expected_t exp_item;

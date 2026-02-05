@@ -53,8 +53,12 @@ class router_env extends uvm_env;
         m_port_a_agent.mon.ap.connect(m_scoreboard.port_a_imp);
         m_port_b_agent.mon.ap.connect(m_scoreboard.port_b_imp);
         m_output_agent.monitor.ap.connect(m_scoreboard.output_imp);
-
-        m_reg_agent.mon.ap.connect(m_scoreboard.reg_imp);
+        
+        // Pass RAL model handle to scoreboard (scoreboard queries mirror)
+        m_scoreboard.reg_model = m_reg_model;
+        
+        // No longer need to connect reg_imp - scoreboard queries RAL mirror instead
+        // m_reg_agent.mon.ap.connect(m_scoreboard.reg_imp);
 
         m_reg_model.default_map.set_sequencer(m_reg_agent.seqr, m_reg_adapter);
         m_reg_model.default_map.set_auto_predict(0);  // Disable - use predictor instead
@@ -63,6 +67,7 @@ class router_env extends uvm_env;
         m_predictor.map = m_reg_model.default_map;
         m_predictor.adapter = m_reg_adapter;
         m_reg_agent.mon.ap.connect(m_predictor.bus_in);
+        
         
         // Initialize register mirror to reset values (software model only)
         m_reg_model.reset();

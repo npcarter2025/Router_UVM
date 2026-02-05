@@ -44,7 +44,15 @@ package router_pkg;
     `include "agent/output_agent/output_agent.svh"
 
     //----------------------------------------------------------
-    // Scoreboard
+    // RAL (Register Abstraction Layer) - Must come before scoreboard
+    //----------------------------------------------------------
+    `include "ral/ctrl_reg.svh"
+    `include "ral/collision_cnt_reg.svh"
+    `include "ral/router_reg_block.svh"
+    `include "ral/router_reg_adapter.svh"
+
+    //----------------------------------------------------------
+    // Scoreboard (needs RAL types)
     //----------------------------------------------------------
     `include "env/router_scoreboard.svh"
 
@@ -52,14 +60,6 @@ package router_pkg;
     // Virtual Sequencer
     //----------------------------------------------------------
     `include "env/router_virtual_sequencer.svh"
-        
-    //----------------------------------------------------------
-    // RAL (Register Abstraction Layer)
-    //----------------------------------------------------------
-    `include "ral/ctrl_reg.svh"
-    `include "ral/collision_cnt_reg.svh"
-    `include "ral/router_reg_block.svh"
-    `include "ral/router_reg_adapter.svh"
 
     //----------------------------------------------------------
     // Coverage
