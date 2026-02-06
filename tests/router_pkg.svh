@@ -36,6 +36,9 @@ package router_pkg;
     `include "agent/port_b_agent/port_b_driver.svh"
     `include "agent/reg_agent/reg_driver.svh"
 
+    `include "agent/port_a_agent/port_a_error_driver.svh"
+    `include "agent/port_b_agent/port_b_error_driver.svh"
+
     //----------------------------------------------------------
     // Monitors
     //----------------------------------------------------------
@@ -92,6 +95,7 @@ package router_pkg;
     // Virtual Sequences
     //----------------------------------------------------------
     `include "seq/router_base_vseq.svh"
+    `include "seq/directed_data_vseq.svh"
     `include "seq/collision_vseq.svh"
     `include "seq/priority_vseq.svh"
     `include "seq/disable_vseq.svh"
@@ -109,6 +113,7 @@ package router_pkg;
     `include "tests/back_to_back_test.svh"
     `include "tests/ral_sanity_test.svh"
     `include "tests/backdoor_test.svh"
+    `include "tests/error_injection_test.svh"
 
 endpackage
 

@@ -38,33 +38,39 @@ class port_a_driver extends uvm_driver #(port_a_item);
             // Get next transaction from sequencer
             seq_item_port.get_next_item(req);
             
-            // Apply configurable delay before driving
-            if (m_cfg.max_delay > 0) begin
-                repeat ($urandom_range(m_cfg.min_delay, m_cfg.max_delay)) @(vif.drv_cb_Port_A);
-            end
-            
-            `uvm_info("PORT_A_DRV", $sformatf("Driving: %s", req.convert2string()), UVM_MEDIUM)
-            
-            // Drive the signals
-            vif.drv_cb_Port_A.data_a  <= req.data_a;
-            vif.drv_cb_Port_A.addr_a  <= req.addr_a;
-            vif.drv_cb_Port_A.valid_a <= req.valid_a;
-            
-            // Wait for handshake (ready_a) or timeout
-            @(vif.drv_cb_Port_A);
-            while (!vif.drv_cb_Port_A.ready_a) begin
-                @(vif.drv_cb_Port_A);
-            end
-            
-            // Capture response
-            req.ready_a = vif.drv_cb_Port_A.ready_a;
-            
-            // Deassert valid after transfer
-            vif.drv_cb_Port_A.valid_a <= 1'b0;
+            // Drive the item (can be overridden for error injection)
+            drive_item(req);
             
             // Signal sequencer we're done
             seq_item_port.item_done();
         end
+    endtask
+
+    // Virtual method to drive a single item - can be overridden for error injection
+    virtual task drive_item(port_a_item item);
+        // Apply configurable delay before driving
+        if (m_cfg.max_delay > 0) begin
+            repeat ($urandom_range(m_cfg.min_delay, m_cfg.max_delay)) @(vif.drv_cb_Port_A);
+        end
+        
+        `uvm_info("PORT_A_DRV", $sformatf("Driving: %s", item.convert2string()), UVM_MEDIUM)
+        
+        // Drive the signals
+        vif.drv_cb_Port_A.data_a  <= item.data_a;
+        vif.drv_cb_Port_A.addr_a  <= item.addr_a;
+        vif.drv_cb_Port_A.valid_a <= item.valid_a;
+        
+        // Wait for handshake (ready_a) or timeout
+        @(vif.drv_cb_Port_A);
+        while (!vif.drv_cb_Port_A.ready_a) begin
+            @(vif.drv_cb_Port_A);
+        end
+        
+        // Capture response
+        item.ready_a = vif.drv_cb_Port_A.ready_a;
+        
+        // Deassert valid after transfer
+        vif.drv_cb_Port_A.valid_a <= 1'b0;
     endtask
 
 
