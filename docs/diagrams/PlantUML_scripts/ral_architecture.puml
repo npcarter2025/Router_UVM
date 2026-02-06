@@ -1,0 +1,100 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam backgroundColor #FEFEFE
+
+title RAL (Register Abstraction Layer) Architecture
+
+rectangle "Test Level" #LightGreen {
+    [Test/Sequence] as Test
+}
+
+rectangle "RAL Model" #LightYellow {
+    [router_reg_block] as RegBlock
+    [ctrl_reg] as CtrlReg
+    [collision_cnt_reg] as CollReg
+    [uvm_reg_map] as RegMap
+    
+    RegBlock *-- CtrlReg
+    RegBlock *-- CollReg
+    RegBlock *-- RegMap
+}
+
+rectangle "Translation" #LightCyan {
+    [router_reg_adapter] as Adapter
+    [uvm_reg_predictor] as Predictor
+}
+
+rectangle "Bus Agent" #LightBlue {
+    [reg_agent] as Agent
+    [reg_sequencer] as Seqr
+    [reg_driver] as Drv
+    [reg_monitor] as Mon
+    
+    Agent *-- Seqr
+    Agent *-- Drv
+    Agent *-- Mon
+}
+
+database "DUT Registers" #LightCoral {
+    [Hardware\nRegisters] as DUTRegs
+}
+
+' Frontdoor path (read/write via bus)
+Test --> RegBlock : read/write calls
+RegBlock --> RegMap : address mapping
+RegMap --> Adapter : convert to bus op
+Adapter --> Seqr : send reg_item
+Seqr --> Drv : sequence items
+Drv --> DUTRegs : drive bus
+
+' Backdoor path (direct HDL access)
+RegBlock ..> DUTRegs : Backdoor\nAccess
+
+' Monitor path (observe and update mirror)
+DUTRegs --> Mon : observe bus
+Mon --> Predictor : bus transactions
+Predictor --> RegMap : update mirror
+
+' Adapter used by predictor
+Predictor .> Adapter : uses
+
+note right of RegBlock
+  **Register Model**
+  Software representation
+  of hardware registers
+  
+  Provides:
+  - read() / write()
+  - update() / mirror()
+  - peek() / poke()
+end note
+
+note right of Adapter
+  **Adapter**
+  Converts RAL operations
+  to bus transactions
+  
+  reg2bus(): RAL -> reg_item
+  bus2reg(): reg_item -> RAL
+end note
+
+note right of Predictor
+  **Predictor**
+  Observes bus activity
+  Updates register mirrors
+  to match hardware
+end note
+
+note left of Test
+  **Test Usage:**
+  
+  // Frontdoor (via bus)
+  m_reg_model.ctrl.write(data)
+  m_reg_model.collision_cnt.read(data)
+  
+  // Backdoor (direct HDL)
+  m_reg_model.ctrl.peek(data)
+  m_reg_model.ctrl.poke(data)
+end note
+
+@enduml

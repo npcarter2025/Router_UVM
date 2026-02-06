@@ -1,0 +1,113 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam backgroundColor #FEFEFE
+
+title Configuration Object Propagation Flow
+
+package "Test Level" #LightGreen {
+    component [router_base_test\n____\n1. Create router_env_config\n2. Get VIF from config_db\n3. Call set_vif()\n4. Call configure_env()\n5. Put in config_db] as Test
+    
+    database "UVM\nconfig_db" as ConfigDB
+}
+
+package "Environment Configuration" #LightYellow {
+    component [router_env_config\n____\nm_port_a_cfg\nm_port_b_cfg\nm_reg_cfg\nm_output_cfg\nenable_scoreboard\nenable_coverage\nvif\n____\nset_vif()] as EnvCfg
+    
+    component [port_a_config\n____\nis_active\ncoverage_enable\nerror_injection_enable\nmin_delay, max_delay\nerror_rate\nvif] as PortACfg
+    
+    component [port_b_config\n____\n(same structure)] as PortBCfg
+    
+    component [reg_config\n____\n(same structure)] as RegCfg
+    
+    component [output_config\n____\nis_active = PASSIVE\ncoverage_enable\nvif] as OutputCfg
+    
+    EnvCfg *-- PortACfg
+    EnvCfg *-- PortBCfg
+    EnvCfg *-- RegCfg
+    EnvCfg *-- OutputCfg
+}
+
+package "Environment Level" #LightBlue {
+    component [router_env\n____\n1. Get router_env_config\n2. Use for conditional creation\n3. Create agents] as Env
+    
+    component [port_a_agent] as AgentA
+    component [port_b_agent] as AgentB
+    component [m_scoreboard] as SB
+}
+
+package "Agent Level" #LightCyan {
+    component [port_a_driver] as DrvA
+    component [port_a_monitor] as MonA
+    component [port_a_sequencer] as SeqA
+}
+
+' Flow annotations
+note right of Test
+  **Step 1: Create Config**
+  m_env_cfg = router_env_config::create()
+  
+  **Step 2: Get VIF**
+  config_db#(vif)::get(this, "", "vif", vif)
+  
+  **Step 3: Set All VIFs**
+  m_env_cfg.set_vif(vif)
+  
+  **Step 4: Customize**
+  configure_env(m_env_cfg)
+  
+  **Step 5: Distribute**
+  config_db::set("m_env", ..., m_env_cfg)
+  config_db::set("m_env.m_port_a_agent", ..., port_a_cfg)
+end note
+
+' Propagation flow
+Test -down-> ConfigDB : set configs
+ConfigDB -down-> EnvCfg : test puts env config
+
+Test -down-> Env : creates
+
+ConfigDB -down-> Env : env gets config
+note on link
+  config_db#(router_env_config)::get()
+end note
+
+Env -down-> AgentA : creates
+Env --> AgentB : creates
+Env --> SB : conditional create\n(if cfg.enable_scoreboard)
+
+ConfigDB -down-> AgentA : agent gets config
+note on link
+  config_db#(port_a_config)::get()
+end note
+
+AgentA -down-> DrvA : creates if ACTIVE
+AgentA --> MonA : creates
+AgentA --> SeqA : creates if ACTIVE
+
+ConfigDB -down-> DrvA : driver gets config
+ConfigDB --> MonA : monitor gets config
+
+note bottom of DrvA
+  **Driver Uses Config:**
+  - vif = m_cfg.vif
+  - Apply min_delay/max_delay
+  - Check error_injection_enable
+end note
+
+note bottom of MonA
+  **Monitor Uses Config:**
+  - vif = m_cfg.vif
+  - coverage_enable flag
+end note
+
+' Key points
+note left of ConfigDB
+  **Config_DB is the Central**
+  **Distribution Mechanism**
+  
+  Set by: Test
+  Get by: Environment, Agents, 
+          Drivers, Monitors
+end note
+
+@enduml

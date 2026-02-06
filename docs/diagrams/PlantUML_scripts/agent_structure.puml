@@ -1,0 +1,77 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam backgroundColor #FEFEFE
+skinparam component {
+    BackgroundColor LightBlue
+    BorderColor DarkBlue
+    ArrowColor Navy
+}
+
+title UVM Agent Internal Structure - Port A Agent
+
+package "port_a_agent" {
+    
+    component [port_a_driver] as Driver
+    component [port_a_monitor] as Monitor
+    component [port_a_sequencer] as Sequencer
+    component [port_a_config] as Config
+    
+    port "seq_item_port" as drv_port
+    port "analysis_port" as mon_ap
+    port "seq_item_export" as seq_export
+    
+    Driver --> drv_port
+    Monitor --> mon_ap
+    Sequencer --> seq_export
+}
+
+' Internal connections
+drv_port -down-> seq_export : get_next_item()
+
+' External interfaces
+interface "Virtual Interface\n(dual_port_router_if)" as VIF
+Driver .up.> VIF : drives signals
+Monitor .up.> VIF : observes signals
+
+' Config usage
+Config .down.> Driver : used by
+Config .down.> Monitor : used by
+Config .down.> Sequencer : used by
+
+' Analysis port output
+mon_ap -right-> [Scoreboard] : writes transactions
+
+' Sequence input
+[Sequences] -down-> Sequencer : starts on
+
+note bottom of Driver
+  **port_a_driver**
+  Fields: vif, m_cfg
+  Methods: build_phase(), run_phase(), drive_item()
+  
+  Gets items from sequencer,
+  applies configurable delays,
+  and drives the virtual interface
+end note
+
+note bottom of Monitor
+  **port_a_monitor**
+  Fields: vif, m_cfg, ap
+  Methods: build_phase(), run_phase()
+  
+  Observes interface,
+  captures transactions,
+  and sends to analysis port
+end note
+
+note bottom of Config
+  **port_a_config**
+  - is_active (UVM_ACTIVE/PASSIVE)
+  - coverage_enable
+  - error_injection_enable
+  - min_delay, max_delay
+  - error_rate
+  - vif (virtual interface)
+end note
+
+@enduml

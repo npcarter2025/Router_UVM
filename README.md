@@ -4,8 +4,10 @@ The purpose is to create a scalable environment that implements Virtual Sequence
 
 # Testbench Architecture
 High Level Overview
-![Router Architecture](docs/diagrams/diagram_2.png "I made this with PlantUML")
-![Router Architecture](docs/diagrams/diagram_1.png "I made this with mermaid.js")
+![Router Architecture](docs/diagrams/PlantUML_scripts/testbench_architecture_v2.png "I made this with PlantUML")
+![Router Architecture](docs/diagrams/PlantUML_scripts/ral_architecture.png "I made this with PlantUML")
+<!-- ![Router Architecture](docs/diagrams/diagram_2.png "I made this with PlantUML")
+![Router Architecture](docs/diagrams/diagram_1.png "I made this with mermaid.js") -->
 
 
 ## Key Verification Features
@@ -30,7 +32,6 @@ I have already made rough drafts for a DPI-C Golden Model, and a Coverage class,
 
 ---
 
-Below are some good debugging patterns that I am trying to memorize.
 
 
 # Current Structure
@@ -41,22 +42,26 @@ Router_UVM
 ├── agent
 │   ├── output_agent
 │   │   ├── output_agent.svh
+│   │   ├── output_config.svh
 │   │   ├── output_item.svh
 │   │   └── output_monitor.svh
 │   ├── port_a_agent
 │   │   ├── port_a_agent.svh
+│   │   ├── port_a_config.svh
 │   │   ├── port_a_driver.svh
 │   │   ├── port_a_item.svh
 │   │   ├── port_a_monitor.svh
 │   │   └── port_a_sequencer.svh
 │   ├── port_b_agent
 │   │   ├── port_b_agent.svh
+│   │   ├── port_b_config.svh
 │   │   ├── port_b_driver.svh
 │   │   ├── port_b_item.svh
 │   │   ├── port_b_monitor.svh
 │   │   └── port_b_sequencer.svh
 │   └── reg_agent
 │       ├── reg_agent.svh
+│       ├── reg_config.svh
 │       ├── reg_driver.svh
 │       ├── reg_item.svh
 │       ├── reg_monitor.svh
@@ -66,6 +71,7 @@ Router_UVM
 │   └── test_plans/...
 ├── env
 │   ├── router_env.svh
+│   ├── router_env_config.svh
 │   ├── router_scoreboard.svh
 │   └── router_virtual_sequencer.svh
 ├── ral
@@ -92,6 +98,7 @@ Router_UVM
 └── tests
     ├── back_to_back_test.svh
     ├── backdoor_test.svh
+    ├── config_test.svh
     ├── disable_test.svh
     ├── priority_test.svh
     ├── ral_sanity_test.svh
@@ -100,7 +107,7 @@ Router_UVM
 ```
 
 
-
+Below are some good debugging patterns that I am trying to memorize.
 
 # UVM Debugging Grep Patterns
 

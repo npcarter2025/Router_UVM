@@ -1,0 +1,215 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam backgroundColor #FEFEFE
+skinparam defaultTextAlignment center
+
+title Detailed Router UVM Testbench Architecture (Version 2)
+
+package "Test Level" #LightGreen {
+    component "router_base_test\n____\nCreate & configure environment\nStart virtual sequences\nManage test phases\n____\nm_env : router_env\nm_vseqr : virtual_sequencer\nm_reg_model : reg_block" as Test
+}
+
+package "Environment (router_env)" #LightYellow {
+    
+    component "Virtual Sequencer\n____\nrouter_virtual_sequencer\nCoordinates sequences\nacross agents" as VSeq
+    
+    component "Scoreboard\n____\nrouter_scoreboard\nChecks routing,\ncollisions, priority,\ndata integrity" as SB
+    
+    component "Coverage\n____\nrouter_coverage\nMonitors: ports,\naddresses, collisions,\npriority, crosses" as Cov
+    
+    component "RAL\n____\nrouter_reg_block\nctrl_reg\ncollision_cnt_reg\nadapter & predictor" as RAL
+}
+
+package "Port A Agent (UVM_ACTIVE)" #LightCyan {
+    component "port_a_agent" as PA_Agent
+    
+    component "port_a_driver\n____\nDrives: data_a, addr_a, valid_a\nUses config delays\nError injection" as PA_Drv
+    
+    component "port_a_monitor\n____\nObserves: valid_a && ready_a\nCaptures transactions\nSends to analysis_port" as PA_Mon
+    
+    component "port_a_sequencer\n____\nHandles: port_a_item\nport_a_sequences" as PA_Seq
+    
+    component "port_a_config\n____\nis_active\ncoverage_enable\nerror_injection_enable\nmin/max_delay\nvif" as PA_Cfg
+    
+    PA_Agent *-- PA_Drv
+    PA_Agent *-- PA_Mon
+    PA_Agent *-- PA_Seq
+    PA_Agent ..> PA_Cfg : uses
+    PA_Seq <--> PA_Drv : seq_item_port
+}
+
+package "Port B Agent (UVM_ACTIVE)" #LightCyan {
+    component "port_b_agent" as PB_Agent
+    
+    component "port_b_driver\n____\nDrives: data_b, addr_b, valid_b" as PB_Drv
+    
+    component "port_b_monitor\n____\nObserves: valid_b && ready_b\nCaptures transactions" as PB_Mon
+    
+    component "port_b_sequencer\n____\nHandles: port_b_item\nport_b_sequences" as PB_Seq
+    
+    component "port_b_config\n____\nis_active\ncoverage_enable\nerror_injection_enable" as PB_Cfg
+    
+    PB_Agent *-- PB_Drv
+    PB_Agent *-- PB_Mon
+    PB_Agent *-- PB_Seq
+    PB_Agent ..> PB_Cfg : uses
+    PB_Seq <--> PB_Drv : seq_item_port
+}
+
+package "Register Agent (UVM_ACTIVE)" #LightCyan {
+    component "reg_agent" as Reg_Agent
+    
+    component "reg_driver\n____\nDrives: addr, data\nwr_en, rd_en\nControls DUT registers" as Reg_Drv
+    
+    component "reg_monitor\n____\nObserves register txns\nUpdates predictor" as Reg_Mon
+    
+    component "reg_sequencer\n____\nHandles: reg_item\nRAL sequences" as Reg_Seq
+    
+    component "reg_config\n____\nis_active\nmin/max_delay\nvif" as Reg_Cfg
+    
+    Reg_Agent *-- Reg_Drv
+    Reg_Agent *-- Reg_Mon
+    Reg_Agent *-- Reg_Seq
+    Reg_Agent ..> Reg_Cfg : uses
+    Reg_Seq <--> Reg_Drv : seq_item_port
+}
+
+package "Output Agent (UVM_PASSIVE)" #Lavender {
+    component "output_agent" as Out_Agent
+    
+    component "output_monitor\n____\nObserves all 4 outputs:\ndout_0-3, valid_0-3\nCaptures routed data" as Out_Mon
+    
+    component "output_config\n____\nis_active = PASSIVE\ncoverage_enable\nvif" as Out_Cfg
+    
+    Out_Agent *-- Out_Mon
+    Out_Agent ..> Out_Cfg : uses
+}
+
+database "DUT\n(dual_port_router)\n____\nInputs: Port A/B\nRegisters\nOutputs: 4 ports\nready signals\ncollision counter" as DUT
+
+' Virtual interface connections
+interface "Virtual Interface\n(dual_port_router_if)" as VIF
+VIF <--> DUT : Physical Signals
+
+' Driver to DUT connections
+PA_Drv --> VIF : drives port_a
+PB_Drv --> VIF : drives port_b
+Reg_Drv --> VIF : drives registers
+
+' Monitor from DUT connections
+VIF --> PA_Mon : observes
+VIF --> PB_Mon : observes
+VIF --> Reg_Mon : observes
+VIF --> Out_Mon : observes
+
+' Analysis port connections to Scoreboard
+PA_Mon -[#blue]-> SB : port_a_ap
+PB_Mon -[#blue]-> SB : port_b_ap
+Out_Mon -[#blue]-> SB : output_ap
+
+' Analysis port connections to Coverage
+PA_Mon -[#green]-> Cov : port_a_cov
+PB_Mon -[#green]-> Cov : port_b_cov
+Out_Mon -[#green]-> Cov : output_cov
+Reg_Mon -[#green]-> Cov : reg_cov
+
+' RAL connections
+RAL --> Reg_Seq : reg sequences
+Reg_Mon -[#orange]-> RAL : predictor updates
+
+' Virtual sequencer connections
+Test --> VSeq : starts vseqs
+VSeq ..> PA_Seq : controls
+VSeq ..> PB_Seq : controls
+VSeq ..> Reg_Seq : controls
+
+' Environment contains all
+Test *-- VSeq
+Test *-- SB
+Test *-- Cov
+Test *-- RAL
+
+Test *-- PA_Agent
+Test *-- PB_Agent
+Test *-- Reg_Agent
+Test *-- Out_Agent
+
+note right of SB
+  **Scoreboard Checking**
+  
+  1. Receives input transactions
+     from Port A/B monitors
+  2. Receives output transactions
+     from Output monitor
+  3. Predicts expected routing
+  4. Compares actual vs expected
+  5. Reports mismatches
+  
+  Handles:
+  - Address routing
+  - Priority conflicts
+  - Collision cases
+  - Data integrity
+end note
+
+note left of Cov
+  **Coverage Collection**
+  
+  Tracks:
+  - All port combinations
+  - All address targets
+  - Collision scenarios
+  - Priority cases
+  - Back-to-back transfers
+  - Boundary conditions
+  
+  Enables:
+  - Functional coverage
+  - Code coverage
+  - Assertion coverage
+end note
+
+note bottom of RAL
+  **Register Abstraction**
+  
+  Frontdoor: Via bus agent
+  Backdoor: Direct HDL access
+  
+  Registers:
+  - ctrl: global_enable, priority
+  - collision_cnt: read-only
+  
+  Predictor auto-updates
+  mirror values from bus
+end note
+
+note right of VSeq
+  **Virtual Sequences**
+  
+  Coordinates:
+  - back_to_back_vseq
+  - collision_vseq
+  - priority_vseq
+  - directed_data_vseq
+  - disable_vseq
+  - ral_sanity_vseq
+  
+  Can control multiple
+  agents simultaneously
+end note
+
+legend right
+  **Color Coding**
+  |<#LightGreen> Test Level |
+  |<#LightYellow> Environment Level |
+  |<#LightCyan> Active Agents |
+  |<#Lavender> Passive Agent |
+  
+  **Connection Types**
+  <color:blue>Blue: Scoreboard Analysis Ports
+  <color:green>Green: Coverage Analysis Ports
+  <color:orange>Orange: RAL Predictor
+  <color:black>Black: Standard Connections
+endlegend
+
+@enduml

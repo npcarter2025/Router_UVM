@@ -96,6 +96,14 @@ waves:
 		echo "No waveform file found. Run simulation first."; \
 	fi
 
+# Generate PlantUML diagrams
+diagrams:
+	@echo "============================================"
+	@echo "Generating PlantUML Diagrams..."
+	@echo "============================================"
+	@cd docs/diagrams && ./generate_diagrams.sh
+	@echo "Diagrams generated in docs/diagrams/PlantUML_scripts/"
+
 # ============================================================================
 # Help
 # ============================================================================
@@ -113,6 +121,7 @@ help:
 	@echo "  make clean        - Remove generated files"
 	@echo "  make cleanall     - Remove all generated files"
 	@echo "  make waves        - Open waveform viewer"
+	@echo "  make diagrams     - Generate PlantUML documentation diagrams"
 	@echo "  make help         - Show this help"
 	@echo ""
 	@echo "Options:"
@@ -125,4 +134,4 @@ help:
 	@echo "  make run UVM_VERBOSITY=UVM_HIGH"
 	@echo ""
 
-.PHONY: all compile run run_medium run_high clean waves help
+.PHONY: all compile run run_medium run_high clean cleanall waves diagrams help

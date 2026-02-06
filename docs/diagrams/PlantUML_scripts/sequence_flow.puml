@@ -1,0 +1,84 @@
+@startuml
+skinparam sequenceMessageAlign center
+skinparam backgroundColor #FEFEFE
+
+title UVM Sequence Flow - Transaction Execution
+
+actor Test
+participant "Virtual\nSequencer" as VSeq
+participant "port_a\nSequencer" as Seq
+participant "port_a\nDriver" as Drv
+participant "Virtual\nInterface" as VIF
+database "DUT" as DUT
+participant "port_a\nMonitor" as Mon
+participant "Scoreboard" as SB
+
+== Test Starts Sequence ==
+
+Test -> VSeq : vseq.start(m_vseqr)
+activate VSeq
+
+VSeq -> Seq : Start port_a_sequence
+activate Seq
+
+== Sequence Body Executes ==
+
+Seq -> Seq : randomize item
+note right
+  port_a_item randomized:
+  - data_a
+  - addr_a  
+  - valid_a
+end note
+
+Seq -> Drv : seq_item_port.get_next_item(req)
+activate Drv
+
+== Driver Processes Item ==
+
+Drv -> Drv : Apply config delay\n(min_delay to max_delay)
+
+Drv -> VIF : Drive signals\nvif.data_a = req.data_a\nvif.addr_a = req.addr_a\nvif.valid_a = 1
+VIF -> DUT : Physical signals
+
+Drv -> VIF : Wait for handshake\nwhile (!ready_a)
+VIF --> Drv : ready_a = 1
+
+Drv -> VIF : Deassert valid\nvif.valid_a = 0
+
+Drv -> Seq : seq_item_port.item_done()
+deactivate Drv
+
+== Monitor Observes Transaction ==
+
+Mon -> VIF : Observe signals
+VIF --> Mon : valid_a && ready_a
+
+Mon -> Mon : Capture transaction
+note right
+  Create port_a_item:
+  - data_a
+  - addr_a
+  - valid_a
+  - ready_a
+end note
+
+Mon -> SB : analysis_port.write(item)
+activate SB
+SB -> SB : Check transaction
+deactivate SB
+
+== Loop or Complete ==
+
+Seq -> Seq : More items?
+
+alt More Sequences
+    Seq -> Seq : Continue loop
+else Sequence Done
+    Seq --> VSeq : sequence complete
+    deactivate Seq
+    VSeq --> Test : vseq complete
+    deactivate VSeq
+end
+
+@enduml
