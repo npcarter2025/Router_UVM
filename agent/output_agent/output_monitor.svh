@@ -2,10 +2,10 @@
 `define OUTPUT_MONITOR_SVH
 
 class output_monitor extends uvm_monitor;
-
     `uvm_component_utils(output_monitor)
 
     virtual dual_port_router_if vif;
+    output_config m_cfg;
 
     // Analysis port to send observed transactions
     uvm_analysis_port #(output_item) ap;
@@ -19,9 +19,11 @@ class output_monitor extends uvm_monitor;
 
         ap = new("ap", this);
 
-        if (!uvm_config_db#(virtual dual_port_router_if)::get(this, "", "vif", vif)) begin
-            `uvm_fatal("OUTPUT_MON", "Couldn't get virtual interface from config_db")
+        if (!uvm_config_db#(output_config)::get(this, "", "output_config", m_cfg)) begin
+            `uvm_fatal(get_type_name(), "Failed to get output_config")
         end
+
+        vif = m_cfg.vif;
     endfunction
 
     virtual task run_phase(uvm_phase phase);

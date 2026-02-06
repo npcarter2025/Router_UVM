@@ -5,6 +5,7 @@ class router_base_test extends uvm_test;
     `uvm_component_utils(router_base_test)
 
     router_env m_env;
+    router_env_config m_env_cfg; 
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -12,7 +13,29 @@ class router_base_test extends uvm_test;
 
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
+        m_env_cfg = router_env_config::type_id::create("m_env_cfg");
+
+        if (!uvm_config_db#(virtual dual_port_router_if)::get(this, "", "vif", m_env_cfg.vif)) begin
+            `uvm_fatal(get_type_name(), "Failed to get VIF")
+        end
+
+        m_env_cfg.set_vif(m_env_cfg.vif);
+
+        configure_env(m_env_cfg);
+
+        // Put config in database for environment
+        uvm_config_db#(router_env_config)::set(this, "m_env", "router_env_config", m_env_cfg);
+        uvm_config_db#(port_a_config)::set(this, "m_env.m_port_a_agent", "port_a_config", m_env_cfg.m_port_a_cfg);
+        uvm_config_db#(port_b_config)::set(this, "m_env.m_port_b_agent", "port_b_config", m_env_cfg.m_port_b_cfg);
+        uvm_config_db#(reg_config)::set(this, "m_env.m_reg_agent", "reg_config", m_env_cfg.m_reg_cfg);
+        uvm_config_db#(output_config)::set(this, "m_env.m_output_agent", "output_config", m_env_cfg.m_output_cfg);
+
+
         m_env = router_env::type_id::create("m_env", this);
+    endfunction
+
+    virtual function void configure_env(router_env_config cfg);
+        //Default configuration - override in derived tests
     endfunction
 
     virtual function void end_of_elaboration_phase(uvm_phase phase);

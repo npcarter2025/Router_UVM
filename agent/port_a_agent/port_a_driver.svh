@@ -5,6 +5,7 @@ class port_a_driver extends uvm_driver #(port_a_item);
     `uvm_component_utils(port_a_driver)
 
     virtual dual_port_router_if vif;
+    port_a_config m_cfg;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -13,9 +14,11 @@ class port_a_driver extends uvm_driver #(port_a_item);
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
-        if (!uvm_config_db#(virtual dual_port_router_if)::get(this, "", "vif", vif)) begin
-            `uvm_fatal("PORT_A_DRV", "Coudln't get virtual interface from config_db")
+        if (!uvm_config_db#(port_a_config)::get(this, "", "port_a_config", m_cfg)) begin
+            `uvm_fatal(get_type_name(), "Failed to get port_a_config")
         end
+
+        vif = m_cfg.vif;
     endfunction
 
     virtual task run_phase(uvm_phase phase);
@@ -34,6 +37,11 @@ class port_a_driver extends uvm_driver #(port_a_item);
         forever begin
             // Get next transaction from sequencer
             seq_item_port.get_next_item(req);
+            
+            // Apply configurable delay before driving
+            if (m_cfg.max_delay > 0) begin
+                repeat ($urandom_range(m_cfg.min_delay, m_cfg.max_delay)) @(vif.drv_cb_Port_A);
+            end
             
             `uvm_info("PORT_A_DRV", $sformatf("Driving: %s", req.convert2string()), UVM_MEDIUM)
             

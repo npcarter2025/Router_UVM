@@ -5,6 +5,7 @@ class port_a_monitor extends uvm_monitor;
     `uvm_component_utils(port_a_monitor)
 
     virtual dual_port_router_if vif;
+    port_a_config m_cfg;
 
     uvm_analysis_port #(port_a_item) ap;
 
@@ -13,15 +14,15 @@ class port_a_monitor extends uvm_monitor;
     endfunction
 
     virtual function void build_phase(uvm_phase phase);
-
         super.build_phase(phase);
 
         ap = new("ap", this);
 
-        if (!uvm_config_db#(virtual dual_port_router_if)::get(this, "", "vif", vif)) begin
-            `uvm_fatal("PORT_A_MON", "couldn't get vif from config_db")
+        if (!uvm_config_db#(port_a_config)::get(this, "", "port_a_config", m_cfg)) begin
+            `uvm_fatal(get_type_name(), "Failed to get port_a_config")
         end
 
+        vif = m_cfg.vif;
     endfunction
 
     virtual task run_phase(uvm_phase phase);

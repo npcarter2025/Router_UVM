@@ -2,8 +2,9 @@
 `define OUTPUT_AGENT_SVH
 
 class output_agent extends uvm_agent;
-
     `uvm_component_utils(output_agent)
+
+    output_config m_cfg;
 
     // Only a monitor - this is a passive agent
     output_monitor monitor;
@@ -17,6 +18,12 @@ class output_agent extends uvm_agent;
 
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
+
+        if (!uvm_config_db#(output_config)::get(this, "", "output_config", m_cfg)) begin
+            `uvm_fatal(get_type_name(), "Failed to get output_config from config_db")
+        end
+
+        uvm_config_db#(output_config)::set(this, "monitor", "output_config", m_cfg);
 
         // Always create monitor (passive agent)
         monitor = output_monitor::type_id::create("monitor", this);

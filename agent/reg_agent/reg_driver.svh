@@ -2,11 +2,10 @@
 `define REG_DRIVER_SVH
 
 class reg_driver extends uvm_driver #(reg_item);
-
-
     `uvm_component_utils(reg_driver)
 
     virtual dual_port_router_if vif;
+    reg_config m_cfg;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -15,9 +14,11 @@ class reg_driver extends uvm_driver #(reg_item);
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
-        if (!uvm_config_db#(virtual dual_port_router_if)::get(this, "", "vif", vif)) begin
-            `uvm_fatal("REG_DRV", "Vif couldn't be found in the config_db")
+        if (!uvm_config_db#(reg_config)::get(this, "", "reg_config", m_cfg)) begin
+            `uvm_fatal(get_type_name(), "Failed to get reg_config")
         end
+
+        vif = m_cfg.vif;
     endfunction
 
     virtual task run_phase(uvm_phase phase);
@@ -39,6 +40,12 @@ class reg_driver extends uvm_driver #(reg_item);
         forever begin
             `uvm_info("REG_DRV", "waiting for next item", UVM_HIGH)
             seq_item_port.get_next_item(req);
+
+            // Apply configurable delay before driving
+            if (m_cfg.max_delay > 0) begin
+                repeat ($urandom_range(m_cfg.min_delay, m_cfg.max_delay)) @(vif.drv_cb_Ctrl);
+            end
+
             `uvm_info("REG_DRV", $sformatf("Got item: %s", req.convert2string()), UVM_MEDIUM)
 
             @(vif.drv_cb_Ctrl);

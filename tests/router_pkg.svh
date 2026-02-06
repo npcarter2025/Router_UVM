@@ -6,6 +6,15 @@ package router_pkg;
     `include "uvm_macros.svh"
 
     //----------------------------------------------------------
+    // Configuration Objects (must come before agents/env)
+    //----------------------------------------------------------
+    `include "agent/port_a_agent/port_a_config.svh"
+    `include "agent/port_b_agent/port_b_config.svh"
+    `include "agent/reg_agent/reg_config.svh"
+    `include "agent/output_agent/output_config.svh"
+    `include "env/router_env_config.svh"
+
+    //----------------------------------------------------------
     // Items (sequence items / transactions)
     //----------------------------------------------------------
     `include "agent/port_a_agent/port_a_item.svh"
@@ -94,6 +103,7 @@ package router_pkg;
     // Tests
     //----------------------------------------------------------
     `include "tests/router_base_test.svh"
+    `include "tests/config_test.svh"
     `include "tests/disable_test.svh"
     `include "tests/priority_test.svh"
     `include "tests/back_to_back_test.svh"

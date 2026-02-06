@@ -23,3 +23,5 @@ verdiLog/
 # Coverage database
 *.vdb
 *.xml
+
+dpi_reference/
