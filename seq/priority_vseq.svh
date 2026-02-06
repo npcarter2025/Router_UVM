@@ -10,7 +10,7 @@ class priority_vseq extends router_base_vseq;
     `uvm_object_utils(priority_vseq)
 
     // Number of collisions to test per priority setting
-    int num_collisions = 3;
+    int num_collisions = 300;
 
     function new(string name = "priority_vseq");
         super.new(name);

@@ -13,6 +13,7 @@ class router_env extends uvm_env;
 
     router_virtual_sequencer m_vseqr;
     router_scoreboard m_scoreboard;
+    router_scoreboard_dpi m_scoreboard_dpi;
 
     //RAL components
     router_reg_block                m_reg_model;
@@ -43,10 +44,10 @@ class router_env extends uvm_env;
             `uvm_info(get_type_name(), "Regular scoreboard enabled", UVM_LOW)
         end
 
-        // if (m_cfg.enable_dpi_scoreboard) begin
-        //     m_scoreboard_dpi = router_scoreboard_dpi::type_id::create("m_scoreboard_dpi", this);
-        //     `uvm_info(get_type_name(), "DPI-C scoreboard enabled", UVM_LOW)
-        // end
+        if (m_cfg.enable_dpi_scoreboard) begin
+            m_scoreboard_dpi = router_scoreboard_dpi::type_id::create("m_scoreboard_dpi", this);
+            `uvm_info(get_type_name(), "DPI-C scoreboard enabled", UVM_LOW)
+        end
 
         // if (m_cfg.enable_coverage) begin
         //     m_coverage = router_coverage::type_id::create("m_coverage", this);
@@ -86,12 +87,12 @@ class router_env extends uvm_env;
         end
 
 
-        // if (m_cfg.enable_dpi_scoreboard) begin
-        //     m_port_a_agent.mon.ap.connect(m_scoreboard_dpi.port_a_imp);
-        //     m_port_b_agent.mon.ap.connect(m_scoreboard_dpi.port_b_imp);
-        //     m_output_agent.monitor.ap.connect(m_scoreboard_dpi.output_imp);
-        //     m_reg_agent.mon.ap.connect(m_scoreboard_dpi.reg_imp);
-        // end
+        if (m_cfg.enable_dpi_scoreboard) begin
+            m_port_a_agent.mon.ap.connect(m_scoreboard_dpi.port_a_imp);
+            m_port_b_agent.mon.ap.connect(m_scoreboard_dpi.port_b_imp);
+            m_output_agent.monitor.ap.connect(m_scoreboard_dpi.output_imp);
+            m_reg_agent.mon.ap.connect(m_scoreboard_dpi.reg_imp);
+        end
 
         // if (m_cfg.enable_coverage) begin
         //     m_port_a_agent.mon.ap.connect(m_coverage.port_a_export);

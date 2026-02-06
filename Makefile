@@ -14,9 +14,13 @@ UVM_VERBOSITY ?= UVM_LOW
 
 # Source files
 RTL_SOURCES = src/dual_port_router_if.sv src/dual_port_router.sv
+DPI_SOURCES = dpi/router_dpi_pkg.sv
 TB_SOURCES = tb/tb_top.sv
 
-ALL_SOURCES = $(RTL_SOURCES) $(TB_SOURCES)
+
+
+
+ALL_SOURCES = $(RTL_SOURCES) $(DPI_SOURCES) $(TB_SOURCES)
 
 # Test name (default: router_base_test)
 TEST ?= router_base_test
@@ -30,7 +34,8 @@ VCS_FLAGS = -sverilog \
             -Mdir=$(BUILD_DIR)/csrc \
 			+acc+rw \
 			-cm line+cond+fsm+tgl \
-			-cm line+cond+fsm+tgl
+			-cm line+cond+fsm+tgl \
+			-LDFLAGS -Wl,-rpath=$(shell pwd)/$(DPI_DIR)
 
 # Log file
 LOG_FILE ?= $(BUILD_DIR)/sim.log
@@ -40,6 +45,14 @@ SIM_FLAGS = +UVM_TESTNAME=$(TEST) \
             +UVM_VERBOSITY=$(UVM_VERBOSITY) \
             -l $(LOG_FILE)
 
+# DPI-C files
+DPI_DIR = dpi
+DPI_SRC = $(DPI_DIR)/router_model.cpp
+DPI_SO = $(DPI_DIR)/router_model.so 
+DPI_PKG = $(DPI_DIR)/router_dpi_pkg.sv
+
+
+
 # ============================================================================
 # Targets
 # ============================================================================
@@ -47,34 +60,41 @@ SIM_FLAGS = +UVM_TESTNAME=$(TEST) \
 # Default target
 all: compile run
 
+#Compile C++ DPI model to shared library
+$(DPI_SO): $(DPI_SRC)
+	@echo "============================================"
+	@echo "Compiling C++ DPI-C Model..."
+	@echo "============================================"
+	g++ -shared -fPIC -o $@ $< -std=c++11
+
 # Compile the testbench
-compile:
+compile: $(DPI_SO)
 	@echo "============================================"
 	@echo "Compiling UVM Testbench..."
 	@echo "============================================"
 	@mkdir -p $(BUILD_DIR)
-	$(VCS) $(VCS_FLAGS) $(ALL_SOURCES) -o $(SIMV)
+	$(VCS) $(VCS_FLAGS) $(ALL_SOURCES) $(DPI_SO) -o $(SIMV)
 
 # Run simulation
 run:
 	@echo "============================================"
 	@echo "Running test: $(TEST)"
 	@echo "============================================"
-	./$(SIMV) $(SIM_FLAGS)
+	LD_LIBRARY_PATH=$(shell pwd)/$(DPI_DIR):$$LD_LIBRARY_PATH ./$(SIMV) $(SIM_FLAGS)
 
 # Run with medium verbosity
 run_medium:
 	@echo "============================================"
 	@echo "Running test: $(TEST) (MEDIUM verbosity)"
 	@echo "============================================"
-	./$(SIMV) $(SIM_FLAGS) +UVM_VERBOSITY=UVM_MEDIUM
+	LD_LIBRARY_PATH=$(shell pwd)/$(DPI_DIR):$$LD_LIBRARY_PATH ./$(SIMV) $(SIM_FLAGS) +UVM_VERBOSITY=UVM_MEDIUM
 
 # Run with high verbosity
 run_high:
 	@echo "============================================"
 	@echo "Running test: $(TEST) (HIGH verbosity)"
 	@echo "============================================"
-	./$(SIMV) $(SIM_FLAGS) +UVM_VERBOSITY=UVM_HIGH
+	LD_LIBRARY_PATH=$(shell pwd)/$(DPI_DIR):$$LD_LIBRARY_PATH ./$(SIMV) $(SIM_FLAGS) +UVM_VERBOSITY=UVM_HIGH
 
 # Clean generated files
 clean:
@@ -83,6 +103,7 @@ clean:
 	rm -rf ucli.key vc_hdrs.h .vcsmx_rebuild DVEfiles
 	rm -rf AN.DB novas* verdiLog
 	rm -rf *.log *.vcd
+	rm -rf $(DPI_SO)
 
 # View waveforms (if dump.vcd exists)
 waves:

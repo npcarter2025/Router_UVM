@@ -3,7 +3,10 @@
 
 package router_pkg;
     import uvm_pkg::*;
+    import router_dpi_pkg::*;
+
     `include "uvm_macros.svh"
+
 
     //----------------------------------------------------------
     // Configuration Objects (must come before agents/env)
@@ -67,6 +70,7 @@ package router_pkg;
     // Scoreboard (needs RAL types)
     //----------------------------------------------------------
     `include "env/router_scoreboard.svh"
+    `include "env/router_scoreboard_dpi.svh"
 
     //----------------------------------------------------------
     // Virtual Sequencer
@@ -114,6 +118,7 @@ package router_pkg;
     `include "tests/ral_sanity_test.svh"
     `include "tests/backdoor_test.svh"
     `include "tests/error_injection_test.svh"
+    `include "tests/dpi_test.svh"
 
 endpackage
 
