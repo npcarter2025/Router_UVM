@@ -1,0 +1,151 @@
+@startuml dual_port_router_architecture
+
+!theme plain
+skinparam componentStyle rectangle
+skinparam backgroundColor white
+skinparam shadowing false
+
+title Dual Port Router DUT Architecture
+
+' External Interface
+rectangle "External Signals" as ext {
+    portin "clk" as clk
+    portin "rst_n" as rst_n
+}
+
+' Control Plane Interface
+rectangle "Control Plane\n(APB-like Register Interface)" as ctrl_plane {
+    portin "reg_addr[3:0]" as reg_addr
+    portin "reg_wdata[31:0]" as reg_wdata
+    portin "reg_en" as reg_en
+    portin "reg_we" as reg_we
+    portout "reg_rdata[31:0]" as reg_rdata
+}
+
+' Port A Interface
+rectangle "Data Plane: Port A" as port_a {
+    portin "data_a[7:0]" as data_a
+    portin "addr_a[1:0]" as addr_a
+    portin "valid_a" as valid_a
+    portout "ready_a" as ready_a
+}
+
+' Port B Interface
+rectangle "Data Plane: Port B" as port_b {
+    portin "data_b[7:0]" as data_b
+    portin "addr_b[1:0]" as addr_b
+    portin "valid_b" as valid_b
+    portout "ready_b" as ready_b
+}
+
+' Output Interface
+rectangle "Output Interface" as outputs {
+    portout "data_out[4][7:0]" as data_out
+    portout "valid_out[4]" as valid_out
+}
+
+' Main Router Module
+package "dual_port_router" {
+    
+    ' Register Block
+    component "Register Logic" as reg_logic {
+        [Control Register\n(0x0)] as ctrl_reg
+        [Status Register\n(0x4)] as status_reg
+        [Collision Counter\n(0x8)] as collision_cnt
+        
+        note right of ctrl_reg
+            **Control Register (0x0)**
+            [0] = Global Enable
+            [1] = Priority Select
+                  (0: Port A, 1: Port B)
+        end note
+        
+        note right of collision_cnt
+            **Collision Counter (0x8)**
+            Read-only register
+            Increments when both
+            ports are valid simultaneously
+        end note
+    }
+    
+    ' Arbitration Logic
+    component "Arbitration Logic" as arbiter {
+        [Priority Selector] as priority
+        [Ready Signal\nGenerator] as ready_gen
+        [use_a Signal] as use_a_sig
+        
+        note right of priority
+            Decides which port gets access:
+            - If both valid: use ctrl_reg[1]
+            - If only one valid: use that port
+            - If global disabled: neither
+        end note
+    }
+    
+    ' Data Path
+    component "Data Path\n(Registered Outputs)" as datapath {
+        [Output Routing] as routing
+        [Output Registers\n(4 destinations)] as out_regs
+        
+        note right of routing
+            Routes data based on:
+            - addr_a/addr_b (2-bit address)
+            - Arbitration decision (use_a)
+            
+            4 output destinations:
+            data_out[0..3], valid_out[0..3]
+        end note
+    }
+}
+
+' Connections from external to module
+clk -down-> reg_logic : clk
+clk -down-> datapath : clk
+rst_n -down-> reg_logic : rst_n
+rst_n -down-> datapath : rst_n
+
+' Control Plane connections
+reg_addr -down-> reg_logic
+reg_wdata -down-> reg_logic
+reg_en -down-> reg_logic
+reg_we -down-> reg_logic
+reg_logic -down-> reg_rdata
+
+' Control to Arbitration
+ctrl_reg -right-> arbiter : Global Enable\nPriority
+
+' Port A connections
+data_a -down-> datapath : data_a
+addr_a -down-> datapath : addr_a
+valid_a -down-> arbiter : valid_a
+arbiter -up-> ready_a : ready_a
+
+' Port B connections
+data_b -down-> datapath : data_b
+addr_b -down-> datapath : addr_b
+valid_b -down-> arbiter : valid_b
+arbiter -up-> ready_b : ready_b
+
+' Arbitration to Datapath
+arbiter -down-> datapath : use_a
+use_a_sig -right-> collision_cnt : collision detect\n(valid_a && valid_b)
+
+' Datapath to outputs
+datapath -down-> data_out
+datapath -down-> valid_out
+
+' Legend
+legend right
+    |= Signal Type |= Description |
+    | <&arrow-right> | Combinational |
+    | <&arrow-thick-right> | Registered |
+    
+    **Key Features:**
+    1. Dual-port input with arbitration
+    2. Register interface for configuration
+    3. Priority-based conflict resolution
+    4. 4-way output routing
+    5. Collision monitoring
+end legend
+
+@enduml

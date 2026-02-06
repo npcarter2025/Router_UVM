@@ -1,0 +1,139 @@
+@startuml dual_port_router_timing
+
+!pragma teoz true
+
+title Dual Port Router - Timing Diagram
+
+participant "Clock" as clk
+participant "Port A\n(valid/ready/data/addr)" as porta
+participant "Port B\n(valid/ready/data/addr)" as portb
+participant "Arbiter\n(use_a)" as arb
+participant "Outputs\n(data_out/valid_out)" as out
+participant "Collision\nCounter" as cnt
+
+== Scenario 1: Port A Transaction Only ==
+
+clk -> clk: cycle
+porta -> arb: valid_a=1, data=0xAA, addr=0
+activate porta #lightgreen
+arb -> arb: use_a=1
+arb -> porta: ready_a=1
+note right: Port A granted
+
+clk -> clk: cycle (rising edge)
+arb -> out: data_out[0]=0xAA\nvalid_out[0]=1
+activate out #lightgreen
+
+porta -> arb: valid_a=0
+deactivate porta
+arb -> porta: ready_a=0
+
+clk -> clk: cycle
+out -> out: valid_out[0]=0
+deactivate out
+
+== Scenario 2: Port B Transaction Only ==
+
+clk -> clk: cycle
+portb -> arb: valid_b=1, data=0xBB, addr=1
+activate portb #lightblue
+arb -> arb: use_a=0
+arb -> portb: ready_b=1
+note right: Port B granted
+
+clk -> clk: cycle (rising edge)
+arb -> out: data_out[1]=0xBB\nvalid_out[1]=1
+activate out #lightblue
+
+portb -> arb: valid_b=0
+deactivate portb
+arb -> portb: ready_b=0
+
+clk -> clk: cycle
+out -> out: valid_out[1]=0
+deactivate out
+
+== Scenario 3: Collision (Both Ports Valid Simultaneously) ==
+
+clk -> clk: cycle
+porta -> arb: valid_a=1, data=0xA1, addr=0
+activate porta #pink
+portb -> arb: valid_b=1, data=0xB1, addr=1
+activate portb #pink
+note right: **COLLISION!**
+
+arb -> arb: use_a=1 (Port A has priority)
+arb -> porta: ready_a=1
+arb -> portb: ready_b=0
+note right: Port A wins\nPort B blocked
+
+clk -> clk: cycle (rising edge)
+arb -> cnt: collision_cnt++
+arb -> out: data_out[0]=0xA1\nvalid_out[0]=1
+activate out #pink
+
+porta -> arb: valid_a=0
+deactivate porta
+arb -> porta: ready_a=0
+
+clk -> clk: cycle
+out -> out: valid_out[0]=0
+deactivate out
+arb -> arb: use_a=0
+arb -> portb: ready_b=1
+note right: Now Port B gets access
+
+clk -> clk: cycle (rising edge)
+arb -> out: data_out[1]=0xB1\nvalid_out[1]=1
+activate out #lightblue
+
+portb -> arb: valid_b=0
+deactivate portb
+arb -> portb: ready_b=0
+
+clk -> clk: cycle
+out -> out: valid_out[1]=0
+deactivate out
+
+== Scenario 4: Register Write to Change Priority ==
+
+clk -> clk: cycle
+participant "Config\nInterface" as cfg
+cfg -> arb: reg_we=1, reg_addr=0x0\nreg_wdata[1]=1
+note right: Change priority to Port B
+
+clk -> clk: cycle (rising edge)
+arb -> arb: ctrl_reg[1]=1
+note right: Priority now Port B
+
+clk -> clk: cycle
+porta -> arb: valid_a=1, data=0xCC, addr=2
+activate porta #yellow
+portb -> arb: valid_b=1, data=0xDD, addr=3
+activate portb #yellow
+note right: **COLLISION!**\n(Port B priority now)
+
+arb -> arb: use_a=0 (Port B has priority)
+arb -> portb: ready_b=1
+arb -> porta: ready_a=0
+note right: Port B wins this time
+
+clk -> clk: cycle (rising edge)
+arb -> cnt: collision_cnt++
+arb -> out: data_out[3]=0xDD\nvalid_out[3]=1
+activate out #yellow
+
+legend right
+    **Control Register (0x0):**
+    - Bit[0]: Global Enable
+    - Bit[1]: Priority (0=Port A, 1=Port B)
+    
+    **Key Points:**
+    - Registered outputs (1 cycle latency)
+    - Collision counter increments when both valid
+    - Ready signals indicate grant
+    - Priority configurable via register
+    - One port served per cycle during collision
+endlegend
+
+@enduml
