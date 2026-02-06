@@ -81,6 +81,6 @@ For live preview while editing:
 - [ ] Sequence flow diagram
 - [ ] Configuration object propagation
 - [ ] RAL layer architecture
-- [ ] DPI-C integration (when implemented)
+- [x] DPI-C integration - Shows C++/SystemVerilog integration flow
 - [ ] Coverage collection flow
 - [ ] Factory override patterns

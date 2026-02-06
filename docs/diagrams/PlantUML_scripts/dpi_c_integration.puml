@@ -1,0 +1,122 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam backgroundColor #FEFEFE
+
+title DPI-C Integration Architecture - Router Golden Model
+
+package "SystemVerilog (UVM Testbench)" #LightCyan {
+    
+    component [router_dpi_pkg\n____\nDPI-C Import Declarations\n____\nrouter_model_init()\nrouter_model_write_ctrl()\nrouter_model_port_a()\nrouter_model_port_b()\nrouter_model_get_output()] as DPIPkg
+    
+    component [router_scoreboard_dpi\n____\nUses DPI functions:\n- Feed inputs to C++ model\n- Retrieve expected outputs\n- Compare with DUT outputs\n____\nAnalysis Ports:\nport_a_imp, port_b_imp\nreg_imp, output_imp] as SB_DPI
+    
+    component [Monitors\n____\nport_a_monitor\nport_b_monitor\nreg_monitor\noutput_monitor\n____\nCapture DUT transactions] as Monitors
+    
+    component [DUT\n____\ndual_port_router\n____\nDevice Under Test] as DUT
+}
+
+package "DPI-C Interface Layer" #LightYellow {
+    
+    component [Extern C Functions\n____\nC Linkage\n____\nextern C declarations\nfor all DPI functions] as ExternC
+    
+    note right of ExternC
+        **DPI-C Bridge**
+        Provides C linkage so
+        SystemVerilog can call
+        C++ functions
+    end note
+}
+
+package "C++ Implementation" #LightGreen {
+    
+    component [router_model.cpp\n____\nGolden Model Implementation\n____\nRouterState class\nrouter_model functions\nFIFO queues] as CPPModel
+    
+    component [router_model.h\n____\nHeader File\n____\nFunction declarations\nwith extern C] as CPPHeader
+    
+    CPPModel ..> CPPHeader : includes
+}
+
+package "Build Process" #Lavender {
+    
+    component [Compilation\n____\nMakefile Steps\n____\n1. Compile C++ to .so\n2. Compile SV with DPI\n3. Set runtime path] as Build
+}
+
+' Connections showing data flow
+
+Monitors -down-> SB_DPI : "DUT transactions\n(analysis_port.write())"
+
+SB_DPI -down-> DPIPkg : "Call DPI functions\n(SV → C)"
+note on link
+  router_model_port_a(data, addr)
+  router_model_get_output(port, data)
+end note
+
+DPIPkg -down-> ExternC : "DPI-C boundary\ncrossing"
+
+ExternC -down-> CPPModel : "Execute C++\nfunctions"
+
+CPPModel -up-> ExternC : "Return results"
+
+ExternC -up-> DPIPkg : "Return to SV"
+
+DPIPkg -up-> SB_DPI : "Expected values"
+
+DUT -right-> Monitors : "Actual outputs"
+
+' Build connections
+Build .right.> DPIPkg : compiles
+Build .right.> CPPModel : compiles
+
+' Legend and notes
+
+legend right
+  **Data Flow**
+  1. DUT produces outputs
+  2. Monitors capture transactions
+  3. Scoreboard feeds inputs to C++ model
+  4. C++ model predicts outputs
+  5. Scoreboard compares actual vs expected
+  
+  **Key Components**
+  |<#LightCyan> SystemVerilog/UVM |
+  |<#LightYellow> DPI-C Interface |
+  |<#LightGreen> C++ Golden Model |
+  |<#Lavender> Build System |
+endlegend
+
+note bottom of SB_DPI
+  **Scoreboard Operation**
+  
+  write_port_a(item):
+    router_model_port_a(item.data, item.addr)
+  
+  write_output(item):
+    has_data = router_model_get_output(port, expected_data)
+    if (item.data != expected_data)
+      `uvm_error("MISMATCH")
+end note
+
+note top of CPPModel
+  **C++ Model Details**
+  
+  - Maintains internal router state
+  - Implements exact routing logic
+  - Handles priority and collisions
+  - Uses std::queue for FIFOs
+  - Pure functional model (no timing)
+end note
+
+note left of DPIPkg
+  **DPI-C Package**
+  
+  Imported into router_pkg
+  Makes C++ functions
+  callable from SV
+  
+  Type conversions:
+  - byte → unsigned char
+  - int → int/uint32_t
+  - output → pointer
+end note
+
+@enduml
