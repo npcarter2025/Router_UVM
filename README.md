@@ -6,6 +6,7 @@ The purpose is to create a scalable environment that implements Virtual Sequence
 High Level Overview
 ![Router Architecture](docs/diagrams/PlantUML_scripts/testbench_architecture_v2.png "I made this with PlantUML")
 ![Router Architecture](docs/diagrams/PlantUML_scripts/ral_architecture.png "I made this with PlantUML")
+![Router Architecture](docs/diagrams/PlantUML_scripts/dpi_c_integration.png)
 <!-- ![Router Architecture](docs/diagrams/diagram_2.png "I made this with PlantUML")
 ![Router Architecture](docs/diagrams/diagram_1.png "I made this with mermaid.js") -->
 
@@ -25,7 +26,7 @@ High Level Overview
 - [x] Virtual Sequencer & Multi-Agent Connectivity
 - [x] RAL Model & Adapter Implementation
 - [x] Configuration Objects
-- [ ] DPI-C Golden Reference Model (branch: `feature/dpi-c`)
+- [x] DPI-C Golden Reference Model (branch: `feature/dpi-c`)
 - [ ] Functional Coverage (branch: `feature/coverage`)
 
 ## Final Integration
