@@ -24,6 +24,7 @@ High Level Overview
 ## Current Roadmap
 - [x] Virtual Sequencer & Multi-Agent Connectivity
 - [x] RAL Model & Adapter Implementation
+- [x] Configuration Objects
 - [ ] DPI-C Golden Reference Model (branch: `feature/dpi-c`)
 - [ ] Functional Coverage (branch: `feature/coverage`)
 
