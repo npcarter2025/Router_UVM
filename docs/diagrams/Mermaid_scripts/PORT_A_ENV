@@ -1,0 +1,48 @@
+graph TB
+    %% Test and Env Structure
+    subgraph Test_Layer [UVM Test]
+        Top[uvm_test_top: router_base_test]
+    end
+
+    Top --> Env
+
+    subgraph Env_Layer [m_env: router_env]
+        Env((m_env))
+        
+        %% Components
+        SB[m_scoreboard]
+        Pred[m_predictor]
+        Model[Register Model]
+        
+        %% Agents
+        subgraph Agent_A [port_a_agent]
+            MonA[mon]
+            DrvA[drv]
+        end
+
+        subgraph Agent_Out [output_agent]
+            MonOut[monitor]
+        end
+
+        subgraph Agent_Reg [reg_agent]
+            MonR[mon]
+            DrvR[drv]
+        end
+    end
+
+    %% DATA FLOW (The "Action" Lines)
+    MonA == Analysis Port ==> SB
+    MonA == Analysis Port ==> Pred
+    MonOut == Analysis Port ==> SB
+    
+    Pred -. Update .-> Model
+    Model -. Read/Write .-> DrvR
+
+    %% HARDWARE CONNECTIONS
+    subgraph Hardware [Physical DUT]
+        DUT[(Router DUT)]
+    end
+
+    DrvA -.->|vif| DUT
+    DUT -.->|vif| MonOut
+    DrvR -.->|vif| DUT

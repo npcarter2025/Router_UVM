@@ -1,0 +1,61 @@
+graph TB
+    %% Top Level
+    subgraph Test_Layer [UVM Test]
+        Top[uvm_test_top: router_base_test]
+    end
+
+    Top --> Env
+
+    subgraph Env_Layer [m_env: router_env]
+        Env((m_env))
+        
+        %% Environment Level Components
+        SB[m_scoreboard: router_scoreboard]
+        Pred[m_predictor: uvm_reg_predictor]
+        Vseqr[m_vseqr: router_virtual_sequencer]
+        
+        %% Agents
+        subgraph Agent_A [m_port_a_agent]
+            direction TB
+            SeqrA[seqr] --- DrvA[drv]
+            MonA[mon]
+        end
+
+        subgraph Agent_B [m_port_b_agent]
+            direction TB
+            SeqrB[seqr] --- DrvB[drv]
+            MonB[mon]
+        end
+
+        subgraph Agent_Reg [m_reg_agent]
+            direction TB
+            SeqrR[seqr] --- DrvR[drv]
+            MonR[mon]
+        end
+
+        subgraph Agent_Out [m_output_agent]
+            MonOut[monitor]
+        end
+    end
+
+    %% Connections from Env to children
+    Env --> SB
+    Env --> Pred
+    Env --> Vseqr
+    Env --> Agent_A
+    Env --> Agent_B
+    Env --> Agent_Reg
+    Env --> Agent_Out
+
+    %% The Hardware Layer (Not in your log, but physically there)
+    subgraph Hardware [Static World]
+        DUT[(Router DUT)]
+    end
+
+    %% Interface Connections (Software to Hardware)
+    DrvA -.->|vif_a| DUT
+    MonA -.->|vif_a| DUT
+    DrvB -.->|vif_b| DUT
+    MonB -.->|vif_b| DUT
+    DrvR -.->|vif_reg| DUT
+    MonOut -.->|vif_out| DUT

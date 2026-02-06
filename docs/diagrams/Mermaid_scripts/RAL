@@ -1,0 +1,19 @@
+graph LR
+    subgraph RAL [Register Abstraction Layer]
+        Model[Register Model: uvm_reg_block]
+        Predictor[m_predictor: uvm_reg_predictor]
+    end
+
+    subgraph Agent [m_reg_agent]
+        Mon[reg_monitor]
+        Drv[reg_driver]
+    end
+
+    %% Data Flow
+    Mon -->|Analysis Port| Predictor
+    Predictor -->|Map Update| Model
+    Model -->|Sequence| Drv
+    
+    %% Hardware
+    Drv -.->|Reg Bus| DUT[(DUT)]
+    DUT -.->|Reg Bus| Mon

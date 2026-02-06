@@ -1,0 +1,47 @@
+@startuml
+skinparam componentStyle rectangle
+
+package "UVM Testbench" {
+    component [uvm_test_top] as Test
+    component [m_env] as Env
+    
+    package "Agents" {
+        component [m_port_a_agent] as AgentA
+        component [m_port_b_agent] as AgentB
+        component [m_reg_agent] as AgentReg
+        component [m_output_agent] as AgentOut
+    }
+    
+    component [m_scoreboard] as SB
+    component [m_predictor] as Pred
+    database "Reg Model" as Model
+}
+
+node "Hardware" {
+    component [Router DUT] as DUT
+}
+
+' Hierarchy
+Test *-- Env
+Env *-- AgentA
+Env *-- AgentB
+Env *-- AgentReg
+Env *-- AgentOut
+Env *-- SB
+Env *-- Pred
+
+' Data Flow
+AgentA -[#blue]-> SB : analysis_port
+AgentB -[#blue]-> SB : analysis_port
+AgentOut -[#blue]-> SB : analysis_port
+
+' RAL Flow
+AgentReg <-down-> Model : register_map
+Pred -left-> Model : updates
+
+' Physical
+AgentA ..> DUT : vif_a
+AgentB ..> DUT : vif_b
+DUT ..> AgentOut : vif_out
+
+@enduml
