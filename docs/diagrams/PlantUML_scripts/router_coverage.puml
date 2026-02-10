@@ -1,0 +1,216 @@
+@startuml router_coverage
+
+' Color scheme and styling
+skinparam backgroundColor #F8F8F8
+skinparam classBackgroundColor #E8F5E9
+skinparam classBorderColor #4CAF50
+skinparam packageBackgroundColor #FFF3E0
+skinparam packageBorderColor #FF9800
+skinparam noteBackgroundColor #FFF9C4
+skinparam noteBorderColor #F57F17
+
+' Title
+title Router Coverage Class Structure\n(Functional Coverage Collection)
+
+' Main coverage class
+class router_coverage {
+    ==Analysis Ports==
+    + port_a_imp : uvm_analysis_imp_port_a_cov
+    + port_b_imp : uvm_analysis_imp_port_b_cov
+    + analysis_export : inherited from uvm_subscriber
+    
+    ==Transaction Storage==
+    + port_a_txn : port_a_item
+    + port_b_txn : port_b_item
+    + output_txn : output_item
+    
+    ==Register Model Reference==
+    + reg_model : router_reg_block
+    
+    ==Coverage State Variables==
+    + global_enable : bit
+    + priority_val : bit
+    + port_a_valid : bit
+    + port_b_valid : bit
+    + collision_occurred : bit
+    + collision_count : int
+    
+    ==Covergroups (5 Total)==
+    + cg_register_fields : covergroup
+    + cg_port_a_transactions : covergroup
+    + cg_port_b_transactions : covergroup
+    + cg_output_transactions : covergroup
+    + cg_collision_scenarios : covergroup
+    
+    ==Methods==
+    + new(name, parent)
+    + write(output_item t) : void
+    + write_port_a_cov(port_a_item t) : void
+    + write_port_b_cov(port_b_item t) : void
+    + sample_collision_scenario(bit collision) : void
+    + sample_registers() : void
+    + report_phase(phase) : void
+}
+
+' Covergroup details in packages
+package "Covergroup: cg_register_fields" #LightBlue {
+    class register_fields_cg {
+        ==Coverpoints==
+        cp_global_enable : enabled/disabled
+        cp_priority : port_a/port_b priority
+        cp_priority_transitions : state changes
+        
+        ==Cross Coverage==
+        cross_enable_priority : all combinations
+    }
+}
+
+package "Covergroup: cg_port_a_transactions" #LightGreen {
+    class port_a_transactions_cg {
+        ==Coverpoints==
+        cp_port_a_valid : valid/invalid
+        cp_data_a : data ranges (5 bins)
+        cp_addr_a : output ports 0-3
+        cp_ready_a : accepted/rejected
+        
+        ==Cross Coverage==
+        cross_addr_data : data to each port
+        cross_addr_ready : acceptance per port
+    }
+}
+
+package "Covergroup: cg_port_b_transactions" #LightGreen {
+    class port_b_transactions_cg {
+        ==Coverpoints==
+        cp_port_b_valid : valid/invalid
+        cp_data_b : data ranges (5 bins)
+        cp_addr_b : output ports 0-3
+        cp_ready_b : accepted/rejected
+        
+        ==Cross Coverage==
+        cross_addr_data : data to each port
+        cross_addr_ready : acceptance per port
+    }
+}
+
+package "Covergroup: cg_output_transactions" #LightYellow {
+    class output_transactions_cg {
+        ==Coverpoints==
+        cp_output_port : ports 0-3 usage
+        cp_output_data : data patterns
+        
+        ==Cross Coverage==
+        cross_port_data : data values per port
+    }
+}
+
+package "Covergroup: cg_collision_scenarios" #LightCoral {
+    class collision_scenarios_cg {
+        ==Coverpoints==
+        cp_collision : occurred/not occurred
+        cp_enable_during_collision : enabled/disabled
+        cp_priority_during_collision : who wins
+        cp_collision_transitions : state transitions
+        
+        ==Cross Coverage==
+        cross_collision_enable : collision + enable
+        cross_collision_priority : collision + priority
+        cross_collision_enable_priority : all three
+        
+        ==Constraints==
+        illegal_bins : collision when disabled
+        ignore_bins : no collision cases
+    }
+}
+
+' UVM hierarchy
+class "uvm_subscriber<output_item>" as uvm_subscriber {
+    + analysis_export
+    + write(T t) : void
+}
+
+class uvm_component {
+    + build_phase()
+    + connect_phase()
+    + report_phase()
+}
+
+' Transaction types
+class port_a_item {
+    + data_a : logic[7:0]
+    + addr_a : logic[1:0]
+    + valid_a : bit
+    + ready_a : bit
+}
+
+class port_b_item {
+    + data_b : logic[7:0]
+    + addr_b : logic[1:0]
+    + valid_b : bit
+    + ready_b : bit
+}
+
+class output_item {
+    + data : logic[7:0]
+    + port_idx : int
+    + valid : bit
+}
+
+' Register model
+class router_reg_block {
+    + ctrl : ctrl_reg
+    + collision_cnt : collision_cnt_reg
+}
+
+class ctrl_reg {
+    + global_enable : uvm_reg_field
+    + priority_val : uvm_reg_field
+}
+
+' Relationships
+uvm_component <|-- uvm_subscriber
+uvm_subscriber <|-- router_coverage
+
+router_coverage *-- register_fields_cg : contains
+router_coverage *-- port_a_transactions_cg : contains
+router_coverage *-- port_b_transactions_cg : contains
+router_coverage *-- output_transactions_cg : contains
+router_coverage *-- collision_scenarios_cg : contains
+
+router_coverage --> port_a_item : receives via\nport_a_imp
+router_coverage --> port_b_item : receives via\nport_b_imp
+router_coverage --> output_item : receives via\nanalysis_export
+
+router_coverage --> router_reg_block : queries for\nregister values
+router_reg_block *-- ctrl_reg
+
+' Notes
+note right of router_coverage
+**Coverage Collection Flow:**
+1. Receives transactions from 3 analysis ports
+2. Updates state variables
+3. Queries register model for ctrl values
+4. Samples appropriate covergroups
+5. Reports coverage in report_phase
+
+**Total Covergroups: 5**
+**Total Coverage Metric:**
+(port_a + port_b + output + 
+ register + collision) / 5
+end note
+
+note bottom of collision_scenarios_cg
+**Special Features:**
+- Tracks collision events
+- Uses illegal_bins for invalid scenarios
+- Monitors priority arbitration
+- Tracks state transitions
+end note
+
+note top of register_fields_cg
+**Samples from RAL Mirror:**
+Uses reg_model.ctrl fields via
+get_mirrored_value()
+end note
+
+@enduml
