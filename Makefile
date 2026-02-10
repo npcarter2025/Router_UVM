@@ -33,12 +33,18 @@ VCS_FLAGS = -sverilog \
             +incdir+. \
             -Mdir=$(BUILD_DIR)/csrc \
 			+acc+rw \
+			-debug_access+r \
 			-cm line+cond+fsm+tgl \
 			-cm_dir $(BUILD_DIR)/coverage.vdb \
 			-LDFLAGS -Wl,-rpath=$(shell pwd)/$(DPI_DIR)
 
 # Log file
 LOG_FILE ?= $(BUILD_DIR)/sim.log
+
+# Waveform viewer: dve (default) or gtkwave
+WAVE_VIEWER ?= dve
+# DVE invocation (override if your install needs a different path or flags)
+DVE_CMD ?= dve -full64
 
 # Simulation flags
 SIM_FLAGS = +UVM_TESTNAME=$(TEST) \
@@ -107,19 +113,26 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf ucli.key vc_hdrs.h .vcsmx_rebuild DVEfiles
 	rm -rf AN.DB novas* verdiLog
-	rm -rf *.log *.vcd
+	rm -rf *.log *.vcd *.vpd
 	rm -rf $(DPI_SO)
 
-# View waveforms (if dump.vcd exists)
+# View waveforms (testbench creates both dump.vcd and vcdplus.vpd)
+# DVE uses vcdplus.vpd; GTKWave uses dump.vcd
 waves:
-	@if [ -f $(BUILD_DIR)/dump.vcd ]; then \
-		echo "Opening waveform viewer..."; \
-		dve -vpd $(BUILD_DIR)/dump.vcd &; \
-	elif [ -f dump.vcd ]; then \
-		echo "Opening waveform viewer..."; \
-		dve -vpd dump.vcd &; \
+	@if [ "$(WAVE_VIEWER)" = "dve" ]; then \
+		WAVEFILE=""; \
+		if [ -f $(BUILD_DIR)/vcdplus.vpd ]; then WAVEFILE="$(BUILD_DIR)/vcdplus.vpd"; \
+		elif [ -f vcdplus.vpd ]; then WAVEFILE="vcdplus.vpd"; fi; \
+		if [ -z "$$WAVEFILE" ]; then echo "No vcdplus.vpd found. Run 'make run_waves' first."; exit 1; fi; \
+		echo "Opening $$WAVEFILE with DVE..."; \
+		$(DVE_CMD) -vpd $$WAVEFILE & \
 	else \
-		echo "No waveform file found. Run simulation first."; \
+		WAVEFILE=""; \
+		if [ -f $(BUILD_DIR)/dump.vcd ]; then WAVEFILE="$(BUILD_DIR)/dump.vcd"; \
+		elif [ -f dump.vcd ]; then WAVEFILE="dump.vcd"; fi; \
+		if [ -z "$$WAVEFILE" ]; then echo "No dump.vcd found. Run 'make run_waves' first."; exit 1; fi; \
+		echo "Opening $$WAVEFILE with GTKWave..."; \
+		gtkwave $$WAVEFILE & \
 	fi
 
 # Run simulation with waves
@@ -207,6 +220,8 @@ help:
 	@echo "  COVERAGE_TEST=<test_name>       - Specify coverage test (default: comprehensive_coverage_test)"
 	@echo "  UVM_VERBOSITY=<level>           - UVM_NONE/LOW/MEDIUM/HIGH/FULL"
 	@echo "  LOG_FILE=<filename>             - Log file name (default: sim.log)"
+	@echo "  WAVE_VIEWER=dve|gtkwave         - Waveform viewer (default: dve)"
+	@echo "  DVE_CMD=<command>               - DVE invocation (default: dve -full64)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make TEST=router_base_test"

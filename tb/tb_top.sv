@@ -58,8 +58,13 @@ module tb_top;
     initial begin
         uvm_config_db#(virtual dual_port_router_if)::set(null, "*", "vif", vif);
 
+        // VCD for GTKWave
         $dumpfile("dump.vcd");
         $dumpvars(0, tb_top);
+
+        // VPD for DVE
+        $vcdplusfile("vcdplus.vpd");
+        $vcdpluson(0, tb_top);
 
         run_test();
     end
