@@ -7,6 +7,8 @@ High Level Overview
 ![Router Architecture](docs/diagrams/PlantUML_scripts/testbench_architecture_v2.png "I made this with PlantUML")
 ![Router Architecture](docs/diagrams/PlantUML_scripts/ral_architecture.png "I made this with PlantUML")
 ![Router Architecture](docs/diagrams/PlantUML_scripts/dpi_c_integration.png)
+![Router Coverage Class](docs/diagrams/PlantUML_scripts/router_coverage.png)
+^Coverage Diagram is still a WIP (minor errors that I'll fix this week)
 <!-- ![Router Architecture](docs/diagrams/diagram_2.png "I made this with PlantUML")
 ![Router Architecture](docs/diagrams/diagram_1.png "I made this with mermaid.js") -->
 

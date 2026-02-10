@@ -20,6 +20,8 @@ class router_env extends uvm_env;
     router_reg_adapter              m_reg_adapter;
     uvm_reg_predictor #(reg_item)   m_predictor;
 
+    router_coverage                 m_coverage;
+
     function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction
@@ -49,10 +51,10 @@ class router_env extends uvm_env;
             `uvm_info(get_type_name(), "DPI-C scoreboard enabled", UVM_LOW)
         end
 
-        // if (m_cfg.enable_coverage) begin
-        //     m_coverage = router_coverage::type_id::create("m_coverage", this);
-        //     `uvm_info(get_type_name(), "Coverage collection enabled", UVM_LOW)
-        // end
+        if (m_cfg.enable_coverage) begin
+            m_coverage = router_coverage::type_id::create("m_coverage", this);
+            `uvm_info(get_type_name(), "Coverage collection enabled", UVM_LOW)
+        end
 
         m_reg_model = router_reg_block::type_id::create("m_reg_model");
         m_reg_model.set_coverage(UVM_CVR_ALL);  // Enable coverage before building
@@ -94,12 +96,13 @@ class router_env extends uvm_env;
             m_reg_agent.mon.ap.connect(m_scoreboard_dpi.reg_imp);
         end
 
-        // if (m_cfg.enable_coverage) begin
-        //     m_port_a_agent.mon.ap.connect(m_coverage.port_a_export);
-        //     m_port_b_agent.mon.ap.connect(m_coverage.port_b_export);
-        //     m_output_agent.monitor.ap.connect(m_coverage.output_export);
-        //     m_reg_agent.mon.ap.connect(m_coverage.reg_export);
-        // end
+        if (m_cfg.enable_coverage) begin
+            m_port_a_agent.mon.ap.connect(m_coverage.port_a_imp);
+            m_port_b_agent.mon.ap.connect(m_coverage.port_b_imp);
+            m_output_agent.monitor.ap.connect(m_coverage.analysis_export);
+            m_coverage.reg_model = m_reg_model;
+
+        end
 
 
             

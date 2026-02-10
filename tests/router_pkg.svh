@@ -80,8 +80,7 @@ package router_pkg;
     //----------------------------------------------------------
     // Coverage
     //----------------------------------------------------------
-    // Note: Coverage not implemented on this branch yet
-    // `include "env/router_coverage.svh"
+    `include "env/router_coverage.svh"
 
     //----------------------------------------------------------
     // Environment
@@ -119,6 +118,7 @@ package router_pkg;
     `include "tests/backdoor_test.svh"
     `include "tests/error_injection_test.svh"
     `include "tests/dpi_test.svh"
+    `include "tests/comprehensive_coverage_test.svh"
 
 endpackage
 

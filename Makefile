@@ -34,7 +34,7 @@ VCS_FLAGS = -sverilog \
             -Mdir=$(BUILD_DIR)/csrc \
 			+acc+rw \
 			-cm line+cond+fsm+tgl \
-			-cm line+cond+fsm+tgl \
+			-cm_dir $(BUILD_DIR)/coverage.vdb \
 			-LDFLAGS -Wl,-rpath=$(shell pwd)/$(DPI_DIR)
 
 # Log file
@@ -43,13 +43,18 @@ LOG_FILE ?= $(BUILD_DIR)/sim.log
 # Simulation flags
 SIM_FLAGS = +UVM_TESTNAME=$(TEST) \
             +UVM_VERBOSITY=$(UVM_VERBOSITY) \
-            -l $(LOG_FILE)
+            -l $(LOG_FILE) \
+			-cm line+cond+fsm+tgl \
+			-cm_dir $(BUILD_DIR)/coverage.vdb 
 
 # DPI-C files
 DPI_DIR = dpi
 DPI_SRC = $(DPI_DIR)/router_model.cpp
 DPI_SO = $(DPI_DIR)/router_model.so 
 DPI_PKG = $(DPI_DIR)/router_dpi_pkg.sv
+
+# Coverage test name (for dedicated coverage runs)
+COVERAGE_TEST ?= comprehensive_coverage_test
 
 
 
@@ -117,6 +122,53 @@ waves:
 		echo "No waveform file found. Run simulation first."; \
 	fi
 
+# Run simulation with waves
+run_waves: compile
+	@echo "============================================"
+	@echo "Running test with waveform dump: $(TEST)"
+	@echo "============================================"
+	LD_LIBRARY_PATH=$(shell pwd)/$(DPI_DIR):$$LD_LIBRARY_PATH ./$(SIMV) $(SIM_FLAGS) +vcs+dumpvars
+
+# Run with GUI debugger (DVE)
+gui: compile
+	@echo "============================================"
+	@echo "Launching GUI debugger..."
+	@echo "============================================"
+	LD_LIBRARY_PATH=$(shell pwd)/$(DPI_DIR):$$LD_LIBRARY_PATH ./$(SIMV) $(SIM_FLAGS) -gui &
+
+# Run comprehensive coverage test
+run_coverage:
+	@echo "============================================"
+	@echo "Running coverage test: $(COVERAGE_TEST)"
+	@echo "============================================"
+	LD_LIBRARY_PATH=$(shell pwd)/$(DPI_DIR):$$LD_LIBRARY_PATH ./$(SIMV) +UVM_TESTNAME=$(COVERAGE_TEST) +UVM_VERBOSITY=$(UVM_VERBOSITY) -l $(BUILD_DIR)/coverage_sim.log -cm line+cond+fsm+tgl -cm_dir $(BUILD_DIR)/coverage.vdb
+
+report:
+	@echo "============================================"
+	@echo "Generating Coverage Report..."
+	@echo "============================================"
+	urg -dir $(BUILD_DIR)/coverage.vdb -report $(BUILD_DIR)/coverage_report
+	@echo "Coverage report generated in $(BUILD_DIR)/coverage_report/"
+	@echo "Open $(BUILD_DIR)/coverage_report/dashboard.html to view"
+
+
+# Open coverage report in browser (no server needed)
+open_report: report
+	@echo "Opening coverage report in browser..."
+	@if [ -z "$$DISPLAY" ]; then export DISPLAY=:0.0; fi; \
+	firefox "file://$(shell pwd)/$(BUILD_DIR)/coverage_report/dashboard.html" &
+
+# Serve report via HTTP and open in browser (use if open_report has path issues)
+html: report
+	@echo "============================================"
+	@echo "Starting HTTP server on port 8000..."
+	@echo "============================================"
+	@cd $(BUILD_DIR)/coverage_report && python3 -m http.server 8000 &
+	@sleep 2
+	@if [ -z "$$DISPLAY" ]; then export DISPLAY=:0.0; fi; \
+	firefox http://localhost:8000/dashboard.html &
+	@echo "Server running. If port 8000 was in use, run: make open_report"
+
 # Generate PlantUML diagrams
 diagrams:
 	@echo "============================================"
@@ -140,19 +192,27 @@ help:
 	@echo "  make run_medium   - Run with UVM_MEDIUM verbosity"
 	@echo "  make run_high     - Run with UVM_HIGH verbosity"
 	@echo "  make clean        - Remove generated files"
-	@echo "  make cleanall     - Remove all generated files"
+	@echo "  make run_waves    - Run simulation with waveform dump"
+	@echo "  make gui          - Launch simulation with GUI debugger"
 	@echo "  make waves        - Open waveform viewer"
+	@echo "  make run_coverage - Run comprehensive coverage test"
+	@echo "  make report       - Generate coverage report"
+	@echo "  make open_report  - Open coverage report in browser (no server)"
+	@echo "  make html         - Serve report via HTTP and open in browser"
 	@echo "  make diagrams     - Generate PlantUML documentation diagrams"
 	@echo "  make help         - Show this help"
 	@echo ""
 	@echo "Options:"
-	@echo "  TEST=<test_name>           - Specify test (default: router_base_test)"
-	@echo "  UVM_VERBOSITY=<level>      - UVM_NONE/LOW/MEDIUM/HIGH/FULL"
-	@echo "  LOG_FILE=<filename>        - Log file name (default: sim.log)"
+	@echo "  TEST=<test_name>                - Specify test (default: router_base_test)"
+	@echo "  COVERAGE_TEST=<test_name>       - Specify coverage test (default: comprehensive_coverage_test)"
+	@echo "  UVM_VERBOSITY=<level>           - UVM_NONE/LOW/MEDIUM/HIGH/FULL"
+	@echo "  LOG_FILE=<filename>             - Log file name (default: sim.log)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make TEST=router_base_test"
 	@echo "  make run UVM_VERBOSITY=UVM_HIGH"
+	@echo "  make run_coverage COVERAGE_TEST=my_coverage_test"
+	@echo "  make html    # Generate and view coverage report"
 	@echo ""
 
-.PHONY: all compile run run_medium run_high clean cleanall waves diagrams help
+.PHONY: all compile run run_medium run_high run_waves gui run_coverage clean waves report open_report html diagrams help
