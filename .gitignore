@@ -27,3 +27,5 @@ verdiLog/
 dpi_reference/
 
 *.so
+
+!session.xml 

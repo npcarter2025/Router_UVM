@@ -182,6 +182,24 @@ html: report
 	firefox http://localhost:8000/dashboard.html &
 	@echo "Server running. If port 8000 was in use, run: make open_report"
 
+# Prepare coverage report for GitHub Pages (copy to docs/coverage)
+# URG uses dot-prefixed CSS/JS (e.g. .urg.css); many hosts don't serve those, so we rename
+# and fix HTML references so colors and styling work on GitHub Pages.
+# Report will be at https://<user>.github.io/<repo>/coverage/dashboard.html
+publish_coverage: report
+	@rm -rf docs/coverage && cp -r $(BUILD_DIR)/coverage_report docs/coverage
+	@for f in docs/coverage/css/.* docs/coverage/js/.*; do \
+		[ -f "$$f" ] && new="$$(echo $$f | sed 's|/\.\([^/]*\)$$|/\1|')" && [ "$$f" != "$$new" ] && mv "$$f" "$$new"; \
+	done; true
+	@for f in docs/coverage/*.html; do \
+		sed -i 's|href="css/\.|href="css/|g; s|src="js/\.|src="js/|g' "$$f"; \
+	done
+	@echo "Coverage report copied to docs/coverage/ (dotfiles renamed for GitHub Pages)"
+	@echo "To publish on GitHub Pages:"
+	@echo "  1. Commit and push:  git add docs/coverage && git commit -m 'Update coverage report' && git push"
+	@echo "  2. Repo Settings > Pages > Source: Deploy from branch 'main', folder '/docs'"
+	@echo "  3. View at: https://<user>.github.io/<repo>/coverage/dashboard.html"
+
 # Generate PlantUML diagrams
 diagrams:
 	@echo "============================================"
@@ -212,6 +230,7 @@ help:
 	@echo "  make report       - Generate coverage report"
 	@echo "  make open_report  - Open coverage report in browser (no server)"
 	@echo "  make html         - Serve report via HTTP and open in browser"
+	@echo "  make publish_coverage - Copy report to docs/coverage for GitHub Pages"
 	@echo "  make diagrams     - Generate PlantUML documentation diagrams"
 	@echo "  make help         - Show this help"
 	@echo ""
@@ -230,4 +249,4 @@ help:
 	@echo "  make html    # Generate and view coverage report"
 	@echo ""
 
-.PHONY: all compile run run_medium run_high run_waves gui run_coverage clean waves report open_report html diagrams help
+.PHONY: all compile run run_medium run_high run_waves gui run_coverage clean waves report open_report html publish_coverage diagrams help
