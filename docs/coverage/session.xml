@@ -1,0 +1,46 @@
+<session version="1.1" release="T-2022.06-SP2-9" timestp="2026-02-11 00:28:24 GMT">
+  <info>
+    <attr name="datetime" value="Tue Feb 10 16:28:47 2026
+"/>
+    <attr name="command" value="urg -dir build/coverage.vdb -report build/coverage_report"/>
+    <attr name="top_instance" value="tb_top,uvm_custom_install_recording,uvm_custom_install_verdi_recording"/>
+  </info>
+  <hvp>
+    <datadef>
+      <metdef name="Line" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Cond" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Toggle" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="FSM" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Group" type="percent" aggregator="average" builtin="1" />
+    </datadef>
+  </hvp>
+  <old_coverage>
+  <scope type="top" name="top">
+    <metric name="Line" value="77/483" />
+    <metric name="Cond" value="11/13" />
+    <metric name="Toggle" value="218/530" />
+    <metric name="Group" value="63.1667%" />
+  </scope>
+  <scope type="instance" name="top">
+  </scope>
+  <scope type="group" name="top">
+    <scope type="group" name="router_pkg::router_coverage::cg_collision_scenarios">
+      <metric name="Group" value="0%" />
+    </scope>
+    <scope type="group" name="router_pkg::router_coverage::cg_port_b_transactions">
+      <metric name="Group" value="71.6667%" />
+    </scope>
+    <scope type="group" name="router_pkg::router_coverage::cg_port_a_transactions">
+      <metric name="Group" value="72.5%" />
+    </scope>
+    <scope type="group" name="router_pkg::router_coverage::cg_register_fields">
+      <metric name="Group" value="75%" />
+    </scope>
+    <scope type="group" name="router_pkg::router_coverage::cg_output_transactions">
+      <metric name="Group" value="96.6667%" />
+    </scope>
+  </scope>
+  <scope type="assert" name="Statistics">
+  </scope>
+  </old_coverage>
+</session>
