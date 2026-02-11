@@ -2,6 +2,8 @@
 In this repository, I made a UVM environment from scratch for a Dual-Port Router.
 The purpose is to create a scalable environment that implements Virtual Sequencers, RAL, Scoreboards, Coverage, and DPI-C. 
 
+To view the on-going current Coverage Report, [CLICK HERE](https://npcarter2025.github.io/Router_UVM/coverage/dashboard.html)
+
 # Testbench Architecture
 High Level Overview
 ![Router Architecture](docs/diagrams/PlantUML_scripts/testbench_architecture_v2.png "I made this with PlantUML")
